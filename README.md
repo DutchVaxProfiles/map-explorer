@@ -178,4 +178,4 @@ This is a project by the [ODISSEI Social Data Science (SoDa)](https://odissei-so
 
 Do you have questions, suggestions, or remarks on the technical implementation? Create an issue in the [issue tracker](https://github.com/sodascience/map-explorer/issues) or feel free to contact [Niek de Schipper](https://github.com/trbknl).
 
-<img src="/public/soda.png" alt="SoDa logo" width="250px"/>
+<img src="https://odissei-soda.nl/images/logos/soda_logo.svg" alt="SoDa logo" width="250px"/>
