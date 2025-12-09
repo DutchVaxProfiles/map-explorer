@@ -146,21 +146,19 @@ function renderMap() {
   tooltipSvg.selectAll("*").remove()
 
   tooltipLayer = tooltipSvg.append('g')
-    .attr('class', 'tooltip-layer')
     .style('pointer-events', 'none')
     .style('visibility', 'hidden')
 
   // Create connector line
-connectorLine = tooltipLayer.append('line')
-  .attr('stroke', '#343434')
-  .attr('stroke-width', 2)
+  connectorLine = tooltipLayer.append('line')
+    .attr('stroke', '#000000')
+    .attr('stroke-width', 4)
 
-// Create center dot
-centerDot = tooltipLayer.append('circle')
-  .attr('r', 5)
-  .attr('fill', '#343434')
-  .attr('stroke', 'white')
-  .attr('stroke-width', 2)
+  // Create center dot
+  centerDot = tooltipLayer.append('circle')
+    .attr('r', 6)
+    .attr('stroke', '#000000')
+    .attr('stroke-width', 4)
 
   const projection = d3.geoMercator().fitSize([width, height], geojsonData)
   const pathGenerator = d3.geoPath().projection(projection)
@@ -262,6 +260,7 @@ centerDot = tooltipLayer.append('circle')
       centerDot
         .attr('cx', screenPoint.x)
         .attr('cy', screenPoint.y)
+        .attr('fill', getColor(d))
 
       // Update connector line (in screen coordinates)
       connectorLine
@@ -301,12 +300,6 @@ centerDot = tooltipLayer.append('circle')
             {
               name: 'flip',
               enabled: false,
-            },
-            {
-              name: 'offset',
-              options: {
-                offset: [0, 5],
-              },
             },
           ],
         })
