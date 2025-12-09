@@ -58,7 +58,7 @@ let tooltipLayer = null
 let centerDot = null
 let connectorLine = null
 
-const FIXED_LINE_LENGTH = 100 // Fixed line length in pixels
+const FIXED_LINE_LENGTH = 50 // Fixed line length in pixels
 
 const virtualElement = ref({
   getBoundingClientRect: () => ({
@@ -151,13 +151,13 @@ function renderMap() {
 
   // Create connector line
   connectorLine = tooltipLayer.append('line')
-    .attr('stroke', '#000000')
+    .attr('stroke', '#343434')
     .attr('stroke-width', 4)
 
   // Create center dot
   centerDot = tooltipLayer.append('circle')
     .attr('r', 6)
-    .attr('stroke', '#000000')
+    .attr('stroke', '#343434')
     .attr('stroke-width', 4)
 
   const projection = d3.geoMercator().fitSize([width, height], geojsonData)
@@ -233,15 +233,6 @@ function renderMap() {
       const value = regionDataMap.get(regionId)?.value ?? "No data"
       const formattedValue = typeof value === 'number' ? value.toLocaleString() : value
 
-      // Set tooltip content
-      tooltipRef.value
-        .style("visibility", "visible")
-        .html(`
-          <div class="font-bold text-gray-800">Region: ${regionId}</div>
-          <div class="text-gray-600 mt-1">${d.properties.name || 'Unknown'}</div>
-          <div class="text-gray-600 mt-1">Value: ${formattedValue}</div>
-        `)
-
       // Transform center coordinates to screen space
       const svgPoint = svgRef.value.createSVGPoint()
       svgPoint.x = centerX
@@ -255,6 +246,23 @@ function renderMap() {
       // Calculate line endpoint in screen coordinates (relative to SVG)
       const lineEndX = preferRight ? screenPoint.x + FIXED_LINE_LENGTH : screenPoint.x - FIXED_LINE_LENGTH
       const lineEndY = screenPoint.y
+
+      const boxClasses = preferRight
+        ? "border border-[#343434] rounded-[8px] rounded-tl-none shadow-[1.5px_1.5px_0px_0.5px_#343434]"
+        : "border border-[#343434] rounded-[8px] rounded-tr-none shadow-[-1.5px_1.5px_0px_0.5px_#343434]";
+
+      // Set tooltip content
+      tooltipRef.value
+        .style("visibility", "visible")
+        .attr(
+          "class",
+          `absolute border-t-[4px] bg-white p-2 pointer-events-none text-sm z-50 ${boxClasses}`
+        )
+        .html(`
+          <div class="font-bold text-gray-800">Region: ${regionId}</div>
+          <div class="text-gray-600 mt-1">${d.properties.name || 'Unknown'}</div>
+          <div class="text-gray-600 mt-1">Value: ${formattedValue}</div>
+        `)
 
       // Update center dot position (in screen coordinates)
       centerDot
@@ -300,6 +308,12 @@ function renderMap() {
             {
               name: 'flip',
               enabled: false,
+            },
+            {
+              name: 'offset',
+              options: {
+                offset: [-2, 0], // shift UP by 2px
+              },
             },
           ],
         })
