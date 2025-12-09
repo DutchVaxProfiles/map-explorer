@@ -49,6 +49,8 @@ const tooltipSvgRef = ref<SVGSVGElement | null>(null)
 const tooltipRef = ref<d3.Selection<HTMLDivElement, unknown, HTMLElement, any> | null>(null)
 const popperInstanceRef = ref(null)
 const isZoomedRef = ref(false)
+const isMobile = ref(false)
+const activeRegion = ref<string | null>(null)
 let zoomBehavior = null
 let svg = null
 let g = null
@@ -59,6 +61,11 @@ let centerDot = null
 let connectorLine = null
 
 const FIXED_LINE_LENGTH = 50 // Fixed line length in pixels
+
+// Detect if device is mobile
+function checkIsMobile() {
+  isMobile.value = window.matchMedia("(hover: none) and (pointer: coarse)").matches
+}
 
 const virtualElement = ref({
   getBoundingClientRect: () => ({
@@ -79,6 +86,121 @@ function resetZoom() {
     svg.transition()
       .duration(750)
       .call(zoomBehavior.transform, d3.zoomIdentity)
+  }
+}
+
+function hideTooltip() {
+  if (tooltipRef.value) {
+    tooltipRef.value.style("visibility", "hidden")
+  }
+  if (tooltipLayer) {
+    tooltipLayer.style('visibility', 'hidden')
+  }
+  activeRegion.value = null
+}
+
+function showTooltip(element, d, regionId) {
+  const bbox = element.getBBox()
+  const centerX = bbox.x + bbox.width / 2
+  const centerY = bbox.y + bbox.height / 2
+
+  d3.select(element)
+    .transition()
+    .duration(100)
+    .attr("stroke-width", 1.5);
+
+  // Get region data for tooltip
+  const regionDataMap = createRegionDataMap(props.regionData)
+  const value = regionDataMap.get(regionId)?.value ?? "No data"
+  const formattedValue = typeof value === 'number' ? value.toLocaleString() : value
+
+  // Transform center coordinates to screen space
+  const svgPoint = svgRef.value.createSVGPoint()
+  svgPoint.x = centerX
+  svgPoint.y = centerY
+  const screenPoint = svgPoint.matrixTransform(g.node().getCTM())
+
+  // Determine tooltip placement (left or right of center)
+  const svgRect = svgRef.value.getBoundingClientRect()
+  const preferRight = screenPoint.x < svgRect.width / 2
+
+  // Calculate line endpoint in screen coordinates (relative to SVG)
+  const lineEndX = preferRight ? screenPoint.x + FIXED_LINE_LENGTH : screenPoint.x - FIXED_LINE_LENGTH
+  const lineEndY = screenPoint.y
+
+  const boxClasses = preferRight
+    ? "border border-[#343434] rounded-[8px] rounded-tl-none shadow-[1.5px_1.5px_0px_0.5px_#343434]"
+    : "border border-[#343434] rounded-[8px] rounded-tr-none shadow-[-1.5px_1.5px_0px_0.5px_#343434]";
+
+  const mapColor = createMapColor(props.config, props.regionData)
+  const color = mapColor.getBinColor(regionDataMap.get(regionId)?.value)
+
+  // Set tooltip content
+  tooltipRef.value
+    .style("visibility", "visible")
+    .attr(
+      "class",
+      `absolute border-t-[4px] bg-white p-2 pointer-events-none text-sm z-50 ${boxClasses}`
+    )
+    .html(`
+      <div class="font-bold text-gray-800">Region: ${regionId}</div>
+      <div class="text-gray-600 mt-1">${d.properties.name || 'Unknown'}</div>
+      <div class="text-gray-600 mt-1">Value: ${formattedValue}</div>
+    `)
+
+  // Update center dot position (in screen coordinates)
+  centerDot
+    .attr('cx', screenPoint.x)
+    .attr('cy', screenPoint.y)
+    .attr('fill', color)
+
+  // Update connector line (in screen coordinates)
+  connectorLine
+    .attr('x1', screenPoint.x)
+    .attr('y1', screenPoint.y)
+    .attr('x2', lineEndX)
+    .attr('y2', lineEndY)
+
+  // Show tooltip layer
+  tooltipLayer.style('visibility', 'visible')
+
+  // Update virtual element position for tooltip - positioned at the END of the line
+  virtualElement.value.getBoundingClientRect = () => ({
+    width: 0,
+    height: 0,
+    top: lineEndY + svgRect.top,
+    right: lineEndX + svgRect.left,
+    bottom: lineEndY + svgRect.top,
+    left: lineEndX + svgRect.left,
+    x: lineEndX + svgRect.left,
+    y: lineEndY + svgRect.top,
+  })
+
+  if (popperInstanceRef.value) {
+    popperInstanceRef.value.destroy()
+    popperInstanceRef.value = null
+  }
+
+  if (tooltipRef.value.node()) {
+    popperInstanceRef.value = createPopper(virtualElement.value, tooltipRef.value.node(), {
+      placement: preferRight ? 'right-start' : 'left-start',
+      modifiers: [
+        {
+          name: 'preventOverflow',
+          enabled: false,
+        },
+        {
+          name: 'flip',
+          enabled: false,
+        },
+        {
+          name: 'offset',
+          options: {
+            offset: [-2, 0], // shift UP by 2px
+          },
+        },
+      ],
+    })
   }
 }
 
@@ -189,16 +311,24 @@ function renderMap() {
   zoomBehavior = d3.zoom()
     .scaleExtent([0.8, 5])
     .on('start', () => {
-      tooltipLayer.style('visibility', 'hidden')
-      tooltipRef.value.style("visibility", "hidden")
+      // Hide tooltip when zooming
+      if (activeRegion.value && isMobile.value) {
+        paths.each(function(pathData) {
+          if (pathData.properties[idColumnGeojson] === activeRegion.value) {
+            d3.select(this)
+              .transition()
+              .duration(100)
+              .attr("stroke-width", 0.5)
+          }
+        })
+      }
+      hideTooltip()
       paths.style('pointer-events', 'none')
     })
     .on('zoom', (event) => {
       const { transform } = event
       currentTransform = transform
 
-      tooltipLayer.style('visibility', 'hidden')
-      tooltipRef.value.style("visibility", "hidden")
       g.style('transform', `translate(${transform.x}px, ${transform.y}px) scale(${transform.k})`)
       g.style('transform-origin', '0 0')
 
@@ -221,128 +351,88 @@ function renderMap() {
   })
 
   paths.on('mouseover', function(event, d) {
-      const bbox = this.getBBox()
-      const centerX = bbox.x + bbox.width / 2
-      const centerY = bbox.y + bbox.height / 2
+      // Only handle mouseover on desktop
+      if (isMobile.value) return
 
-      d3.select(this)
-        .transition()
-        .duration(100)
-        .attr("stroke-width", 1.5);
-
-      // Get region data for tooltip
       const regionId = d.properties[idColumnGeojson]
-      const value = regionDataMap.get(regionId)?.value ?? "No data"
-      const formattedValue = typeof value === 'number' ? value.toLocaleString() : value
-
-      // Transform center coordinates to screen space
-      const svgPoint = svgRef.value.createSVGPoint()
-      svgPoint.x = centerX
-      svgPoint.y = centerY
-      const screenPoint = svgPoint.matrixTransform(g.node().getCTM())
-
-      // Determine tooltip placement (left or right of center)
-      const svgRect = svgRef.value.getBoundingClientRect()
-      const preferRight = screenPoint.x < svgRect.width / 2
-
-      // Calculate line endpoint in screen coordinates (relative to SVG)
-      const lineEndX = preferRight ? screenPoint.x + FIXED_LINE_LENGTH : screenPoint.x - FIXED_LINE_LENGTH
-      const lineEndY = screenPoint.y
-
-      const boxClasses = preferRight
-        ? "border border-[#343434] rounded-[8px] rounded-tl-none shadow-[1.5px_1.5px_0px_0.5px_#343434]"
-        : "border border-[#343434] rounded-[8px] rounded-tr-none shadow-[-1.5px_1.5px_0px_0.5px_#343434]";
-
-      // Set tooltip content
-      tooltipRef.value
-        .style("visibility", "visible")
-        .attr(
-          "class",
-          `absolute border-t-[4px] bg-white p-2 pointer-events-none text-sm z-50 ${boxClasses}`
-        )
-        .html(`
-          <div class="font-bold text-gray-800">Region: ${regionId}</div>
-          <div class="text-gray-600 mt-1">${d.properties.name || 'Unknown'}</div>
-          <div class="text-gray-600 mt-1">Value: ${formattedValue}</div>
-        `)
-
-      // Update center dot position (in screen coordinates)
-      centerDot
-        .attr('cx', screenPoint.x)
-        .attr('cy', screenPoint.y)
-        .attr('fill', getColor(d))
-
-      // Update connector line (in screen coordinates)
-      connectorLine
-        .attr('x1', screenPoint.x)
-        .attr('y1', screenPoint.y)
-        .attr('x2', lineEndX)
-        .attr('y2', lineEndY)
-
-      // Show tooltip layer
-      tooltipLayer.style('visibility', 'visible')
-
-      // Update virtual element position for tooltip - positioned at the END of the line
-      virtualElement.value.getBoundingClientRect = () => ({
-        width: 0,
-        height: 0,
-        top: lineEndY + svgRect.top,
-        right: lineEndX + svgRect.left,
-        bottom: lineEndY + svgRect.top,
-        left: lineEndX + svgRect.left,
-        x: lineEndX + svgRect.left,
-        y: lineEndY + svgRect.top,
-      })
-
-      if (popperInstanceRef.value) {
-        popperInstanceRef.value.destroy()
-        popperInstanceRef.value = null
-      }
-
-      if (tooltipRef.value.node()) {
-        popperInstanceRef.value = createPopper(virtualElement.value, tooltipRef.value.node(), {
-          placement: preferRight ? 'right-start' : 'left-start',
-          modifiers: [
-            {
-              name: 'preventOverflow',
-              enabled: false,
-            },
-            {
-              name: 'flip',
-              enabled: false,
-            },
-            {
-              name: 'offset',
-              options: {
-                offset: [-2, 0], // shift UP by 2px
-              },
-            },
-          ],
-        })
-      }
+      showTooltip(this, d, regionId)
     })
     .on('mouseout', function(event, d) {
+      // Only handle mouseout on desktop
+      if (isMobile.value) return
+
       d3.select(this)
         .transition()
         .duration(100)
         .attr("stroke-width", 0.5)
-        .attr('fill', (d) => {
-          return getColor(d)
+      hideTooltip()
+    })
+    .on('click', function(event, d) {
+      // Only handle click on mobile
+      if (!isMobile.value) return
+
+      event.stopPropagation()
+      const regionId = d.properties[idColumnGeojson]
+
+      // If clicking the same region, hide tooltip
+      if (activeRegion.value === regionId) {
+        d3.select(this)
+          .transition()
+          .duration(100)
+          .attr("stroke-width", 0.5)
+        hideTooltip()
+        return
+      }
+
+      // Reset previous active region
+      if (activeRegion.value) {
+        paths.each(function(pathData) {
+          if (pathData.properties[idColumnGeojson] === activeRegion.value) {
+            d3.select(this)
+              .transition()
+              .duration(100)
+              .attr("stroke-width", 0.5)
+          }
         })
-      tooltipRef.value.style("visibility", "hidden")
-      tooltipLayer.style('visibility', 'hidden')
+      }
+
+      // Show tooltip for new region
+      activeRegion.value = regionId
+      showTooltip(this, d, regionId)
     })
 }
 
 const resizeObserver = new ResizeObserver(entries => {
   for (let entry of entries) {
     renderMap()
-    tooltipRef.value.style("visibility", "hidden")
+    hideTooltip()
   }
 });
 
 onMounted(() => {
+  checkIsMobile()
+  if (isMobile.value) { console.log("[Map] App running on mobile") }
   resizeObserver.observe(svgRef.value);
+
+  // Hide tooltip when clicking outside on mobile
+  if (isMobile.value) {
+    document.addEventListener('click', (e) => {
+      if (!svgRef.value?.contains(e.target as Node)) {
+        if (activeRegion.value) {
+          paths.each(function(pathData) {
+            const idColumnGeojson = props.config.idColumnGeojson
+            if (pathData.properties[idColumnGeojson] === activeRegion.value) {
+              d3.select(this)
+                .transition()
+                .duration(100)
+                .attr("stroke-width", 0.5)
+            }
+          })
+        }
+        hideTooltip()
+      }
+    })
+  }
 })
 
 // Watch for full re-render triggers
