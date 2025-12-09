@@ -125,7 +125,6 @@ import { mapConfigs } from "./config/loader"
 import type { MapConfig } from "./config/types"
 import { MapManager } from "./mapManager"
 import type { GeoJSON } from "geojson"
-import { shallowEqual } from "fast-equals"
 
 // --- UI toggles ---
 const showInfo = ref(false)
@@ -257,8 +256,10 @@ async function initializeApp() {
 watch(
   selectedFilters,
   async () => {
-    if (!isLoading || !dataProcessor.value || !config.value) return
-    if (shallowEqual(selectedFilters.value, config.value.filter)) return
+    if (!isLoading || !dataProcessor.value || !config.value) {
+      console.log("[App] Filter did not change")
+      return
+    }
     console.log("[App] Filter changed, querying new data")
 
     regionData.value = await dataProcessor.value.getRegionData(
