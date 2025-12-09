@@ -1,6 +1,7 @@
 <template>
   <div class="relative w-full h-full">
     <svg class="w-full h-full" ref="svgRef"></svg>
+    <svg class="absolute top-0 left-0 w-full h-full pointer-events-none" ref="tooltipSvgRef" style="overflow: visible;"></svg>
     <Button
       v-show="isZoomedRef"
       class="fixed bottom-4 right-4"
@@ -44,6 +45,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const svgRef = ref<SVGSVGElement | null>(null)
+const tooltipSvgRef = ref<SVGSVGElement | null>(null)
 const tooltipRef = ref<d3.Selection<HTMLDivElement, unknown, HTMLElement, any> | null>(null)
 const popperInstanceRef = ref(null)
 const isZoomedRef = ref(false)
@@ -52,6 +54,11 @@ let svg = null
 let g = null
 let currentTransform = d3.zoomIdentity
 let paths = null
+let tooltipLayer = null
+let centerDot = null
+let connectorLine = null
+
+const FIXED_LINE_LENGTH = 100 // Fixed line length in pixels
 
 const virtualElement = ref({
   getBoundingClientRect: () => ({
@@ -68,7 +75,7 @@ const virtualElement = ref({
 
 function resetZoom() {
   if (svg && zoomBehavior) {
-    currentTransform = d3.zoomIdentity // Reset stored transform
+    currentTransform = d3.zoomIdentity
     svg.transition()
       .duration(750)
       .call(zoomBehavior.transform, d3.zoomIdentity)
@@ -133,9 +140,30 @@ function renderMap() {
       .attr("class", "absolute bg-white p-2 pointer-events-none text-sm card-box z-50")
       .style("visibility", "hidden")
   }
+
+  // Create tooltip layer in separate SVG
+  const tooltipSvg = d3.select(tooltipSvgRef.value)
+  tooltipSvg.selectAll("*").remove()
+
+  tooltipLayer = tooltipSvg.append('g')
+    .attr('class', 'tooltip-layer')
+    .style('pointer-events', 'none')
+    .style('visibility', 'hidden')
+
+  // Create connector line
+connectorLine = tooltipLayer.append('line')
+  .attr('stroke', '#343434')
+  .attr('stroke-width', 2)
+
+// Create center dot
+centerDot = tooltipLayer.append('circle')
+  .attr('r', 5)
+  .attr('fill', '#343434')
+  .attr('stroke', 'white')
+  .attr('stroke-width', 2)
+
   const projection = d3.geoMercator().fitSize([width, height], geojsonData)
   const pathGenerator = d3.geoPath().projection(projection)
-
 
   const mapColor = createMapColor(config, regionData)
 
@@ -144,7 +172,7 @@ function renderMap() {
     return mapColor.getBinColor(region?.value)
   }
 
-  function getOpacity(color) { // hex color input
+  function getOpacity(color) {
     const selected = selectedLegendColor
     if (!selected) return 1
     return selected === color ? 1 : 0.2
@@ -164,14 +192,12 @@ function renderMap() {
     .scaleExtent([0.8, 5])
     .on('start', () => {
       tooltipRef.value.style("visibility", "hidden")
+      tooltipLayer.style('visibility', 'hidden')
       paths.style('pointer-events', 'none')
-
-      // Simplify rendering: reduce stroke width during zoom
-      //paths.attr('stroke-width', 0)
     })
     .on('zoom', (event) => {
       const { transform } = event
-      currentTransform = transform // Store current transform
+      currentTransform = transform
 
       g.style('transform', `translate(${transform.x}px, ${transform.y}px) scale(${transform.k})`)
       g.style('transform-origin', '0 0')
@@ -198,6 +224,7 @@ function renderMap() {
       const bbox = this.getBBox()
       const centerX = bbox.x + bbox.width / 2
       const centerY = bbox.y + bbox.height / 2
+
       d3.select(this)
         .transition()
         .duration(100)
@@ -217,52 +244,73 @@ function renderMap() {
           <div class="text-gray-600 mt-1">Value: ${formattedValue}</div>
         `)
 
-      // Get the mouse position relative to the page, accounting for zoom
-      const [mouseX, mouseY] = d3.pointer(event, document.body)
+      // Transform center coordinates to screen space
+      const svgPoint = svgRef.value.createSVGPoint()
+      svgPoint.x = centerX
+      svgPoint.y = centerY
+      const screenPoint = svgPoint.matrixTransform(g.node().getCTM())
 
-      // Update virtual element position
+      // Determine tooltip placement (left or right of center)
+      const svgRect = svgRef.value.getBoundingClientRect()
+      const preferRight = screenPoint.x < svgRect.width / 2
+
+      // Calculate line endpoint in screen coordinates (relative to SVG)
+      const lineEndX = preferRight ? screenPoint.x + FIXED_LINE_LENGTH : screenPoint.x - FIXED_LINE_LENGTH
+      const lineEndY = screenPoint.y
+
+      // Update center dot position (in screen coordinates)
+      centerDot
+        .attr('cx', screenPoint.x)
+        .attr('cy', screenPoint.y)
+
+      // Update connector line (in screen coordinates)
+      connectorLine
+        .attr('x1', screenPoint.x)
+        .attr('y1', screenPoint.y)
+        .attr('x2', lineEndX)
+        .attr('y2', lineEndY)
+
+      // Show tooltip layer
+      tooltipLayer.style('visibility', 'visible')
+
+      // Update virtual element position for tooltip - positioned at the END of the line
       virtualElement.value.getBoundingClientRect = () => ({
         width: 0,
         height: 0,
-        top: mouseY,
-        right: mouseX,
-        bottom: mouseY,
-        left: mouseX,
-        x: mouseX,
-        y: mouseY,
+        top: lineEndY + svgRect.top,
+        right: lineEndX + svgRect.left,
+        bottom: lineEndY + svgRect.top,
+        left: lineEndX + svgRect.left,
+        x: lineEndX + svgRect.left,
+        y: lineEndY + svgRect.top,
       })
 
       if (popperInstanceRef.value) {
-        popperInstanceRef.value.update()
-      } else if (tooltipRef.value.node()) {
+        popperInstanceRef.value.destroy()
+        popperInstanceRef.value = null
+      }
+
+      if (tooltipRef.value.node()) {
         popperInstanceRef.value = createPopper(virtualElement.value, tooltipRef.value.node(), {
-          placement: 'top',
+          placement: preferRight ? 'right-start' : 'left-start',
           modifiers: [
             {
               name: 'preventOverflow',
-              options: {
-                boundary: document.body,
-                padding: 10,
-              },
+              enabled: false,
             },
             {
               name: 'flip',
-              options: {
-                fallbackPlacements: ['bottom', 'right', 'left'],
-              },
+              enabled: false,
             },
             {
               name: 'offset',
               options: {
-                offset: [0, 10],
+                offset: [0, 5],
               },
             },
           ],
         })
       }
-    })
-    .on('mouseenter', function(event, d) {
-      d3.select(this)
     })
     .on('mouseout', function(event, d) {
       d3.select(this)
@@ -273,26 +321,7 @@ function renderMap() {
           return getColor(d)
         })
       tooltipRef.value.style("visibility", "hidden")
-    })
-    .on('mousemove', function(event) {
-      // Get the mouse position relative to the page, accounting for zoom
-      const [mouseX, mouseY] = d3.pointer(event, document.body)
-
-      virtualElement.value.getBoundingClientRect = () => ({
-        width: 0,
-        height: 0,
-        top: mouseY,
-        right: mouseX,
-        bottom: mouseY,
-        left: mouseX,
-        x: mouseX,
-        y: mouseY,
-      })
-
-      // Update Popper position
-      if (popperInstanceRef.value) {
-        popperInstanceRef.value.update()
-      }
+      tooltipLayer.style('visibility', 'hidden')
     })
 }
 
