@@ -140,7 +140,7 @@ function showTooltip(element, d, regionId) {
     .style("visibility", "visible")
     .attr(
       "class",
-      `absolute border-t-[4px] bg-white p-2 pointer-events-none text-sm z-50 ${boxClasses}`
+      `absolute max-w-1/3 border-t-[4px] bg-white p-2 pointer-events-none text-sm z-50 ${boxClasses}`
     )
     .html(`
       <div class="font-bold text-gray-800">Region: ${regionId}</div>
