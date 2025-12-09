@@ -189,14 +189,16 @@ function renderMap() {
   zoomBehavior = d3.zoom()
     .scaleExtent([0.8, 5])
     .on('start', () => {
-      tooltipRef.value.style("visibility", "hidden")
       tooltipLayer.style('visibility', 'hidden')
+      tooltipRef.value.style("visibility", "hidden")
       paths.style('pointer-events', 'none')
     })
     .on('zoom', (event) => {
       const { transform } = event
       currentTransform = transform
 
+      tooltipLayer.style('visibility', 'hidden')
+      tooltipRef.value.style("visibility", "hidden")
       g.style('transform', `translate(${transform.x}px, ${transform.y}px) scale(${transform.k})`)
       g.style('transform-origin', '0 0')
 
