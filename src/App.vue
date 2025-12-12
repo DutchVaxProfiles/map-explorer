@@ -128,7 +128,7 @@ import type { GeoJSON } from "geojson"
 
 // --- UI toggles ---
 const showInfo = ref(false)
-const showLegend = ref(false)
+const showLegend = ref(true)
 const showControls = ref(false)
 const showMapSelector = ref(false)
 
