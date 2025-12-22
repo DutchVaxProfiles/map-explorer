@@ -1,7 +1,26 @@
 <template>
   <div class="relative w-full h-full">
+    <!-- No data overlay -->
+    <div
+      v-if="!props.regionData?.length"
+      class="absolute inset-0 flex items-center justify-center pointer-events-none"
+    >
+      <div
+        class="rounded-lg border border-[#343434] bg-white px-6 py-4
+               text-lg font-semibold text-gray-800
+               shadow-[2px_2px_0px_0.75px_#343434]"
+      >
+        No data available
+      </div>
+    </div>
+
     <svg class="w-full h-full" ref="svgRef"></svg>
-    <svg class="absolute top-0 left-0 w-full h-full pointer-events-none" ref="tooltipSvgRef" style="overflow: visible;"></svg>
+    <svg
+      class="absolute top-0 left-0 w-full h-full pointer-events-none"
+      ref="tooltipSvgRef"
+      style="overflow: visible;"
+    ></svg>
+
     <Button
       v-show="isZoomedRef"
       class="fixed bottom-4 right-4"
@@ -242,6 +261,7 @@ function renderMap() {
     return
   }
 
+  console.log(regionData.length)
   const regionDataMap = createRegionDataMap(regionData)
 
   svg = d3.select(svgRef.value)
