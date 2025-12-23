@@ -11,6 +11,7 @@ export interface LoadedMapState {
   regionData: RegionData[]
   availableFilterOptions: { [key: string]: string[] }
   selectedFilters: { [key: string]: string }
+  validFilters: Array<Record<string, string>>
 }
 
 type MapKey = string
@@ -33,12 +34,16 @@ export class MapManager {
       config.categoryColumns
     )
 
+    const validFilters = await processor.extractValidFilters(
+      config.categoryColumns
+    )
+
     const selectedFilters: { [key: string]: string } = {}
     for (const [categoryName, values] of Object.entries(availableFilterOptions)) {
       selectedFilters[categoryName] = (values as string[])[0]
     }
 
-    return { availableFilterOptions, selectedFilters }
+    return { availableFilterOptions, selectedFilters, validFilters }
   }
 
   private async loadMap(config: MapConfig): Promise<LoadedMapState> {
@@ -54,7 +59,7 @@ export class MapManager {
     const processor = await ProcessorFactory.create(dataFile)
 
     // Extract filter state
-    const { availableFilterOptions, selectedFilters } =
+    const { availableFilterOptions, selectedFilters, validFilters } =
       await this.extractFilterState(processor, config)
 
     // Determine which filters to use
@@ -73,7 +78,8 @@ export class MapManager {
       dataProcessor: processor,
       regionData: regions,
       availableFilterOptions,
-      selectedFilters: config.filter || selectedFilters
+      selectedFilters: config.filter || selectedFilters,
+      validFilters: validFilters
     }
 
     console.log("[MapManager] Map loaded:", config.mapDescription.title)

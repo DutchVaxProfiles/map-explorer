@@ -261,7 +261,6 @@ function renderMap() {
     return
   }
 
-  console.log(regionData.length)
   const regionDataMap = createRegionDataMap(regionData)
 
   svg = d3.select(svgRef.value)

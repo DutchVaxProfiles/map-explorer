@@ -11,6 +11,8 @@ export abstract class Processor {
 
   abstract extractFilterCategories(categoryCols: string[]): Promise<{ [group: string]: string[] }>
 
+  abstract extractValidFilters(categoryCols: string[]): Promise<Array<Record<string, string>>>
+
   abstract getRegionData(
     selectedCategoryValues: Record<string, string>,
     idColumn: string,

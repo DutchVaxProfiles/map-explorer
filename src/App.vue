@@ -196,6 +196,9 @@ async function applyMap(mapConfig: MapConfig) {
 
   const state = await mapManager.getMapState(mapConfig)
 
+  console.log("========================")
+  console.log(state.validFilters)
+  console.log("========================")
   // Update current config and reactive refs
   config.value = mapConfig
   geojsonData.value = state.geojsonData

@@ -7,7 +7,8 @@ import type { RegionData } from "./types"
 import {
   extractFilterCategories,
   getRegionData,
-  getColumnNames
+  getColumnNames,
+  extractValidFilters
 } from "./helpers"
 
 const READ_FUNCTION = "read_parquet"
@@ -29,6 +30,9 @@ export class ParquetProcessor extends Processor {
     return extractFilterCategories(categoryCols, READ_FUNCTION, this.datasetName)
   }
 
+  async extractValidFilters(categoryCols: string[]): Promise<Array<Record<string, string>>> {
+    return extractValidFilters(categoryCols, READ_FUNCTION, this.datasetName)
+}
   async getRegionData(
     selectedCategoryValues: Record<string, string>,
     idColumn: string,
