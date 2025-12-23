@@ -77,8 +77,7 @@ export async function getRegionData(
     WHERE
       ${filter_clause}
   `
-
-  const out = await executeQuery(query)
+  const out = await executeQuery(query) as RegionData[]
   return out
 }
 

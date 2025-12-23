@@ -1,27 +1,23 @@
 import { check } from "@placemarkio/check-geojson"
+import { ZodError } from "zod"
 
 export function parseGeojson(geojsonString: string) {
   try {
     check(geojsonString)
     const parsedGeojson = JSON.parse(geojsonString)
+
     return {
       valid: true,
       geojson: parsedGeojson,
-      errors: null
+      errors: null as string | null,
     }
-  } catch (e) {
+  } catch (e: unknown) {
+    if (e instanceof ZodError) {
       return {
         valid: false,
         geojson: null,
-        errors: e.issues.map(item => item.message).join(" ")
+        errors: e.issues.map(issue => issue.message).join(" "),
       }
+    }
   }
-}
-
-export function extractPropertyKeys(geojson: any): string[] {
-  const firstFeature = geojson.type === 'FeatureCollection'
-    ? geojson.features[0]
-    : geojson;
-
-  return firstFeature.properties ? Object.keys(firstFeature.properties) : [];
 }

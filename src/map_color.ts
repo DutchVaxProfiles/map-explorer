@@ -1,17 +1,17 @@
 import * as d3 from 'd3'
+import type { RegionData } from './processors/types'
 import type {
-  AppConfig,
+  MapColorConfig,
   ColorScheme,
-  MapColorConfig
-} from './types'
-import type { RegionData } from './processors/types.ts'
+  MapConfig,
+} from './config/types'
 
 export class MapColor {
   private readonly thresholds: number[]
   private readonly colors: string[]
   private readonly borderColor: string
-  private readonly colorScheme: string
-  private readonly colorSchemeInverted: string
+  private readonly colorScheme: ColorScheme
+  private readonly colorSchemeInverted: boolean
 
   constructor({ minValue, maxValue, numBins = 7, colorScheme = "viridis", colorSchemeInverted = false }: MapColorConfig) {
     const bins = Math.max(1, Math.floor(numBins))
@@ -39,7 +39,7 @@ export class MapColor {
   }
 
   private getOptimalBorderColor(): string {
-    const darkSchemes: ColorScheme[] = ['inferno', 'magma', 'plasma', 'viridis', 'turbo', 'cubehelix', 'cividis', 'interpolate']
+    const darkSchemes: ColorScheme[] = ['inferno', 'magma', 'plasma', 'viridis', 'turbo', 'cubehelix', 'cividis']
     const lightSchemes: ColorScheme[] = ['warm', 'cool']
 
     let borderColor = '#000000' // Default for 'no colorscheme' and unknown schemes
@@ -70,13 +70,12 @@ export class MapColor {
       case 'cool':        return d3.interpolateCool
       case 'coolwarm':    return d3.interpolateRdBu
       case 'cubehelix':   return d3.interpolateCubehelixDefault
-      case 'interpolate': return d3.interpolateRdYlBu
       case 'no colorscheme': return () => '#FFFFFF'
       default:            return d3.interpolateViridis
     }
   }
 
-  getBinColor(value: number): string {
+  getBinColor(value: number | undefined): string {
     if (value === undefined) return '#D3D3D3'
     const i = this.thresholds.findIndex((t, j) =>
       value >= t && value < this.thresholds[j + 1]
@@ -90,18 +89,10 @@ export class MapColor {
 }
 
 export function createMapColor(
-  config: AppConfig,
+  config: MapConfig,
   regionData: RegionData[] | undefined
 ): MapColor {
   switch (config.kind) {
-    case "geojson-only": {
-      return new MapColor({
-        minValue: 0,
-        maxValue: 1,
-        numBins: 7,
-        colorScheme: "no colorscheme"
-      })
-    }
     case "geojson-datafile": {
       let minValue = config.mapColorConfig.minValue
       let maxValue = config.mapColorConfig.maxValue

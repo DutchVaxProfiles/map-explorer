@@ -19,37 +19,26 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Selection',
-  props: {
-    options: {
-      type: Array,
-      required: true,
-    },
-    defaultValue: {
-      type: String,
-      default: null
-    },
-    label: {
-      type: String,
-      default: ''
-    }
-  },
-  data() {
-    return {
-      selectedValue: this.defaultValue || (this.options.length > 0 ? this.options[0] : null)
-    };
-  },
-  methods: {
-    emitSelection() {
-      this.$emit('selection-changed', this.selectedValue);
-    }
-  },
-  watch: {
-    defaultValue(newValue) {
-      this.selectedValue = newValue;
-    }
-  }
+<script setup lang="ts">
+import { ref } from "vue"
+
+const props = defineProps<{
+  options: string[]
+  label: string
+  defaultValue?: string | null
+}>()
+
+const emit = defineEmits<{
+  (e: "selection-changed", value: string): void
+}>()
+
+
+const selectedValue = ref<string>(
+  props.defaultValue ?? props.options[0]
+)
+
+function emitSelection() {
+  emit("selection-changed", selectedValue.value)
 }
+
 </script>

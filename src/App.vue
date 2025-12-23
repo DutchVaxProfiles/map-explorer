@@ -124,9 +124,8 @@ import { Processor } from "./processors/processor"
 import { mapConfigs } from "./config/loader"
 import type { MapConfig } from "./config/types"
 import { MapManager } from "./mapManager"
-import type { GeoJSON } from "geojson"
 
-// --- UI toggles ---
+// UI toggles
 const showInfo = ref(false)
 const showLegend = ref(true)
 const showControls = ref(false)
@@ -134,7 +133,7 @@ const showMapSelector = ref(false)
 
 // App state
 const dataProcessor = ref<Processor | undefined>(undefined)
-const geojsonData = ref<GeoJSON | undefined>(undefined)
+const geojsonData = ref<any | undefined>(undefined)
 const regionData = ref<RegionData[] | undefined>(undefined)
 const selectedLegendColor = ref<string>("")
 const config = ref<MapConfig | undefined>(undefined)
@@ -160,7 +159,6 @@ function updateCurrentConfigInConfigs() {
   )
 
   if (idx !== -1) {
-    // Replace the entry to keep reactivity and ensure MapManager sees updated config
     configs.value[idx] = { ...config.value }
   }
 }
@@ -168,6 +166,7 @@ function updateCurrentConfigInConfigs() {
 // Map control handlers
 async function handleSwitchMap(mapTitle: string) {
   if (configs.value.length === 0) return
+  if (config.value === undefined) return
 
   isLoading.value = true
   showMapSelector.value = false
@@ -196,10 +195,6 @@ async function applyMap(mapConfig: MapConfig) {
 
   const state = await mapManager.getMapState(mapConfig)
 
-  console.log("========================")
-  console.log(state.validFilters)
-  console.log("========================")
-  // Update current config and reactive refs
   config.value = mapConfig
   geojsonData.value = state.geojsonData
   dataProcessor.value = state.dataProcessor
@@ -255,7 +250,6 @@ async function initializeApp() {
   console.log("[App] App initialized")
 }
 
-// Watch filter: if filter changed, query new data
 watch(
   selectedFilters,
   async () => {
@@ -284,4 +278,3 @@ function resetSelectedLegendColor() {
   selectedLegendColor.value = ""
 }
 </script>
-

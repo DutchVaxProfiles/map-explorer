@@ -18,35 +18,33 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Checkbox',
-  props: {
-    defaultValue: {
-      type: Boolean,
-      default: false
-    },
-    label: {
-      type: String,
-      default: ''
-    }
-  },
-  data () {
-    return {
-      isChecked: this.defaultValue
-    }
-  },
-  methods: {
-    onChange (e) {
-      this.hasUserInteracted = true
-      this.isChecked = e.target.checked
-      this.$emit('checkbox-changed', this.isChecked)
-    }
-  },
-  watch: {
-    defaultValue (val) {
-      this.isChecked = val
-    }
-  }
+<script setup lang="ts">
+import { computed, ref, watch } from "vue"
+
+const props = defineProps<{
+  defaultValue?: boolean
+  label?: string
+}>()
+
+const emit = defineEmits<{
+  (e: "checkbox-changed", value: boolean): void
+}>()
+
+const label = computed(() => props.label ?? "")
+
+const isChecked = ref<boolean>(props.defaultValue ?? false)
+
+function onChange(e: Event) {
+  const target = e.target as HTMLInputElement | null
+  const checked = target?.checked ?? false
+  isChecked.value = checked
+  emit("checkbox-changed", isChecked.value)
 }
+
+watch(
+  () => props.defaultValue,
+  (val) => {
+    isChecked.value = val ?? false
+  }
+)
 </script>

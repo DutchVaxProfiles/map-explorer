@@ -23,20 +23,19 @@
 import { ref, onMounted, watch } from 'vue'
 import * as d3 from 'd3'
 import {
-  MapColor,
   createMapColor
 } from '../map_color.ts'
-import type { RegionData } from '../parse_data.ts'
-import type { AppConfig } from '../types.ts'
+import type { RegionData } from '../processors/types'
+import type { MapConfig } from '../config/types'
 
 interface Props {
   regionData: RegionData[] | undefined
-  config?: AppConfig
+  config?: MapConfig
   loading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  regionData: () => undefined,
+  regionData: () => [],
   loading: false
 })
 
@@ -68,11 +67,6 @@ function renderLegend() {
   if (!containerRef.value) return
   if (props.loading) return
   if (!props.config) return
-  if (props.config.kind === "geojson-only") {
-    // No legend for this kind, clear if needed
-    if (svg) svg.selectAll('*').remove()
-    return
-  }
   if (!props.regionData || !props.regionData.length) return
 
   // Lazily create the SVG when we first have enough info
@@ -90,7 +84,7 @@ function renderLegend() {
 
   const mapColor = createMapColor(props.config, props.regionData)
   const width = 300
-  const height = 150
+  //const height = 150
   const margin = { top: 40, right: 20, bottom: 40, left: 20 }
   const thresholds = mapColor.getThresholds()
   const colors = mapColor.getColors()
@@ -106,7 +100,7 @@ function renderLegend() {
     .attr('text-anchor', 'middle')
     .attr('font-size', '14px')
     .attr('font-weight', 'bold')
-    .text(props.config.legendTitle)
+    .text(props.config?.legendTitle ?? "")
 
   // Color bins
   colors.forEach((color, i) => {

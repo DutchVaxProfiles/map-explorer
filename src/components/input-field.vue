@@ -3,9 +3,10 @@
     <label v-if="label" class="block text-gray-700 text-sm font-bold mb-2">
       {{ label }}
     </label>
+
     <input
       type="number"
-      :value="inputValue"
+      :value="inputText"
       @input="onInput"
       :placeholder="placeholder"
       :step="step"
@@ -16,30 +17,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount, computed } from 'vue'
-
-function leastSignificantPlace(n: number): number {
-  try {
-    if (!Number.isFinite(n)) throw new Error('Input must be a finite number')
-    if (n === 0) return 1
-    const str = n.toString()
-    const decimalIndex = str.indexOf('.')
-    if (decimalIndex === -1) {
-      const match = str.match(/0+$/)
-      const zeros = match ? match[0].length : 0
-      return 10 ** zeros
-    } else {
-      const trimmed = str.replace(/0+$/, '') // remove trailing zeros
-      const decimals = trimmed.length - 1 - decimalIndex
-      return 10 ** (-decimals)
-    }
-  } catch {
-    return 1
-  }
-}
+import { ref, watch, onBeforeUnmount, computed } from "vue"
 
 type Emits = {
-  (e: 'input-changed', value: number | ''): void
+  (e: "input-changed", value: number): void
 }
 
 const props = defineProps<{
@@ -51,31 +32,76 @@ const props = defineProps<{
 
 const emit = defineEmits<Emits>()
 
-const inputValue = ref<number>(props.defaultValue ?? 0)
+function leastSignificantPlace(n: number): number {
+  if (!Number.isFinite(n)) return 1
+  if (n === 0) return 1
+
+  const str = n.toString()
+  const decimalIndex = str.indexOf(".")
+  if (decimalIndex === -1) {
+    const match = str.match(/0+$/)
+    const zeros = match ? match[0].length : 0
+    return 10 ** zeros
+  }
+
+  const trimmed = str.replace(/0+$/, "")
+  const decimals = trimmed.length - 1 - decimalIndex
+  return 10 ** -decimals
+}
+
+function isValidNumberString(s: string): boolean {
+  const t = s.trim()
+  if (t === "") return false
+  const n = Number(t)
+  return Number.isFinite(n)
+}
+
+const inputText = ref(props.defaultValue != null ? String(props.defaultValue) : "")
+const inputValue = ref<number | undefined>(props.defaultValue)
+
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
+const DEBOUNCE_MS = 500
+
+function clearDebounce() {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+    debounceTimer = null
+  }
+}
 
 function onInput(e: Event) {
   const target = e.target as HTMLInputElement
-  let value: number | '' = target.value === '' ? '' : parseFloat(target.value)
-  if (value !== '' && Number.isNaN(value)) return
-  inputValue.value = value
+  const raw = target.value
 
-  if (debounceTimer) clearTimeout(debounceTimer)
+  inputText.value = raw
+
+  clearDebounce()
   debounceTimer = setTimeout(() => {
-    emit('input-changed', inputValue.value)
-  }, 500)
+    if (!isValidNumberString(raw)) {
+      inputValue.value = undefined
+      return
+    }
+
+    const parsed = Number(raw)
+    inputValue.value = parsed
+    emit("input-changed", parsed)
+  }, DEBOUNCE_MS)
 }
 
 watch(
   () => props.defaultValue,
   (val) => {
-    inputValue.value = val ?? 0
+    inputValue.value = val
+    inputText.value = val != null ? String(val) : ""
   }
 )
 
 onBeforeUnmount(() => {
-  if (debounceTimer) clearTimeout(debounceTimer)
+  clearDebounce()
 })
 
-const step = computed(() => leastSignificantPlace(inputValue.value))
+const step = computed(() =>
+  inputValue.value != null ? leastSignificantPlace(inputValue.value) : 1
+)
 </script>
+

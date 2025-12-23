@@ -41,10 +41,10 @@
 </template>
 
 <script setup lang="ts">
-import type { AppConfig } from './types'
+import type { MapConfig } from '../config/types'
 
 interface Props {
-  config?: AppConfig
+  config?: MapConfig
   loading?: boolean
 }
 

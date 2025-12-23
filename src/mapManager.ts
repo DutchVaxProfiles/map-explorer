@@ -29,6 +29,7 @@ export class MapManager {
   ): Promise<{
     availableFilterOptions: { [key: string]: string[] }
     selectedFilters: { [key: string]: string }
+    validFilters: Record<string, string>[]
   }> {
     const availableFilterOptions = await processor.extractFilterCategories(
       config.categoryColumns

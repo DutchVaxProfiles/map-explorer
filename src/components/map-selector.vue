@@ -59,11 +59,11 @@
 </template>
 
 <script setup lang="ts">
-import type { AppConfig } from './types'
+import type { MapConfig } from '../config/types'
 
 interface Props {
-  configs?: AppConfig[]
-  config?: AppConfig
+  configs?: MapConfig[]
+  config?: MapConfig
   loading?: boolean
 }
 
@@ -71,7 +71,7 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false
 })
 
-const isActive = (cfg: AppConfig) => {
+const isActive = (cfg: MapConfig) => {
   if (!props.config) return false
   return cfg.mapDescription?.title === props.config.mapDescription?.title
 }
@@ -81,11 +81,10 @@ const emit = defineEmits<{
   (e: 'close-map-selector'): void
 }>()
 
-function handleClick(cfg: AppConfig) {
+function handleClick(cfg: MapConfig) {
   const title = cfg.mapDescription?.title
   if (title && !isActive(cfg)) {
     emit('select-map', title)
   }
-  console.log(title)
 }
 </script>

@@ -36,14 +36,14 @@ export type MapColorConfig = z.infer<typeof MapColorConfigSchema>;
 
 
 export const MapConfigSchema = z.discriminatedUnion("kind", [
-  // 1) GeoJSON only
-  z.object({
-    kind: z.literal("geojson-only"),
-    mapDescription: MapDescriptionSchema,
-    geojsonFileName: z.string(),
-    idColumnGeojson: z.string(),
-    legendTitle: z.string().optional(),
-  }),
+  // 1) GeoJSON only (UNSUPPORTED)
+  //z.object({
+  //  kind: z.literal("geojson-only"),
+  //  mapDescription: MapDescriptionSchema,
+  //  geojsonFileName: z.string(),
+  //  idColumnGeojson: z.string(),
+  //  legendTitle: z.string().optional(),
+  //}),
 
   // 2) GeoJSON + external data file
   z.object({

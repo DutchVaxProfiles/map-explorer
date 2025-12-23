@@ -74,19 +74,18 @@
             Map Options
           </h3>
 
-          <div v-if="config?.kind !== 'geojson-only'">
             <div>
               <Selection
                 :label="'Color Scheme'"
-                :options="colorSchemes"
-                :defaultValue="config.mapColorConfig.colorScheme"
+                :options="schemeNames"
+                :defaultValue="config.mapColorConfig?.colorScheme"
                 @selection-changed="handleColorSchemeChanged"
               />
 
               <Checkbox
                 class="mt-3"
                 label="Invert Color Scheme"
-                :defaultValue="config.mapColorConfig.colorSchemeInverted"
+                :defaultValue="config.mapColorConfig?.colorSchemeInverted"
                 @checkbox-changed="handleColorSchemeInvertedChanged"
               >
                 Invert color scheme
@@ -95,7 +94,7 @@
               <Checkbox
                 class="mt-3"
                 label="Dynamic Legend"
-                :defaultValue="config.mapColorConfig.dynamic"
+                :defaultValue="config.mapColorConfig?.dynamic"
                 @checkbox-changed="handleDynamicLegendChanged"
               >
                 Calculate the min and max from the data
@@ -104,8 +103,8 @@
               <InputField
                 class="mt-3"
                 label="Legend Minimum"
-                :defaultValue="config.mapColorConfig.minValue"
-                :disabled="config.mapColorConfig.dynamic"
+                :defaultValue="config.mapColorConfig?.minValue"
+                :disabled="config.mapColorConfig?.dynamic"
                 placeholder="0.00"
                 @input-changed="handleLegendMinimumChanged"
               />
@@ -113,43 +112,32 @@
               <InputField
                 class="mt-3"
                 label="Legend Maximum"
-                :defaultValue="config.mapColorConfig.maxValue"
-                :disabled="config.mapColorConfig.dynamic"
+                :defaultValue="config.mapColorConfig?.maxValue"
+                :disabled="config.mapColorConfig?.dynamic"
                 placeholder="1.00"
                 @input-changed="handleLegendMaximumChanged"
               />
             </div>
           </div>
-
-          <div v-else class="text-gray-500 text-sm italic">
-            No map options available.
-          </div>
         </div>
-      </div>
     </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import Selection from './selection.vue'
 import Checkbox from './checkbox.vue'
 import InputField from './input-field.vue'
 import { colorSchemes } from '../config/types.ts'
+import type { MapConfig } from '../config/types.ts'
 
-const props = defineProps({
-  availableFilterOptions: {
-    type: Object,
-    default: () => ({})
-  },
-  config: {
-    type: Object,
-    required: false
-  },
-  loading: {
-    type: Boolean,
-    default: false
-  }
-})
+const schemeNames: string[] = [...colorSchemes]
+
+const props = defineProps<{
+  availableFilterOptions?: Record<string, any>
+  config?: MapConfig
+  loading?: boolean
+}>()
 
 const emit = defineEmits([
   'filter-changed',
@@ -160,9 +148,9 @@ const hasFilterOptions = computed(() =>
   props.availableFilterOptions && Object.keys(props.availableFilterOptions).length > 0
 )
 
-function getDefaultFilterValue (categoryName, options) {
+function getDefaultFilterValue (categoryName: string, options: string) {
   if (
-    props.config.filter !== undefined &&
+    props.config?.filter !== undefined &&
     Object.prototype.hasOwnProperty.call(props.config.filter, categoryName)
   ) {
     return props.config.filter[categoryName]
@@ -170,34 +158,36 @@ function getDefaultFilterValue (categoryName, options) {
   return options?.[0]
 }
 
-function handleFilterChanged (categoryName, value) {
+function handleFilterChanged (categoryName: string, value: string) {
   emit('filter-changed', categoryName, value)
 }
 
-function handleMapConfigChange (field, value) {
+function handleMapConfigChange (field: string, value: any) {
+  if (!props.config) return
+
   emit('map-config-changed', {
     ...props.config.mapColorConfig,
     [field]: value
   })
 }
 
-function handleColorSchemeChanged (value) {
+function handleColorSchemeChanged (value: string) {
   handleMapConfigChange('colorScheme', value)
 }
 
-function handleColorSchemeInvertedChanged (value) {
+function handleColorSchemeInvertedChanged (value: boolean) {
   handleMapConfigChange('colorSchemeInverted', value)
 }
 
-function handleDynamicLegendChanged (value) {
+function handleDynamicLegendChanged (value: boolean) {
   handleMapConfigChange('dynamic', value)
 }
 
-function handleLegendMinimumChanged (value) {
+function handleLegendMinimumChanged (value: number) {
   handleMapConfigChange('minValue', value)
 }
 
-function handleLegendMaximumChanged (value) {
+function handleLegendMaximumChanged (value: number) {
   handleMapConfigChange('maxValue', value)
 }
 </script>
