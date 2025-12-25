@@ -91,6 +91,7 @@
               :availableFilterOptions="availableFilterOptions"
               :config="config"
               :loading="isLoading"
+              :validFilterLookup="validFilterLookup"
               @filter-changed="handleFilterChanged"
               @map-config-changed="handleMapColorConfigChanged"
             />
@@ -124,6 +125,7 @@ import { Processor } from "./processors/processor"
 import { mapConfigs } from "./config/loader"
 import type { MapConfig } from "./config/types"
 import { MapManager } from "./mapManager"
+import type { ValidFilterLookup } from "./mapManager"
 
 // UI toggles
 const showInfo = ref(false)
@@ -138,6 +140,8 @@ const regionData = ref<RegionData[] | undefined>(undefined)
 const selectedLegendColor = ref<string>("")
 const config = ref<MapConfig | undefined>(undefined)
 const configs = ref<MapConfig[]>([])
+const validFilterLookup = ref<ValidFilterLookup | undefined>(undefined)
+
 
 // Filter state
 const availableFilterOptions = ref<{ [key: string]: string[] }>({})
@@ -201,6 +205,7 @@ async function applyMap(mapConfig: MapConfig) {
   regionData.value = state.regionData
   availableFilterOptions.value = { ...state.availableFilterOptions }
   selectedFilters.value = { ...state.selectedFilters }
+  validFilterLookup.value = state.validFilterLookup
 }
 
 function handleFilterChanged(categoryName: string, value: any) {
