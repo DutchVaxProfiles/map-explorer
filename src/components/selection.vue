@@ -13,25 +13,30 @@
         :key="option"
         :value="option"
       >
-        {{ option }}
+        {{ option }}{{ warningOptions.includes(option) ? ' ⚠️' : '' }}
       </option>
     </select>
   </div>
 </template>
-
 <script setup lang="ts">
+
 import { ref } from "vue"
 
-const props = defineProps<{
-  options: string[]
-  label: string
-  defaultValue?: string | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    options: string[]
+    label: string
+    defaultValue?: string | null
+    warningOptions?: string[]
+  }>(),
+  {
+    warningOptions: () => []
+  }
+)
 
 const emit = defineEmits<{
   (e: "selection-changed", value: string): void
 }>()
-
 
 const selectedValue = ref<string>(
   props.defaultValue ?? props.options[0]
@@ -40,5 +45,4 @@ const selectedValue = ref<string>(
 function emitSelection() {
   emit("selection-changed", selectedValue.value)
 }
-
 </script>

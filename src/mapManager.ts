@@ -188,9 +188,8 @@ export class ValidFilterLookup {
     const index = this.indices.get(targetKey)
     if (!index) return []
 
-    const otherKeys = Object.keys(knownValues).filter(k => k !== targetKey).sort()
+    const otherKeys = Object.keys(knownValues).filter(k => k !== targetKey)
     const compositeKey = otherKeys.map(key => knownValues[key]).join('|')
-
     return Array.from(index.get(compositeKey) || [])
   }
 }

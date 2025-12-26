@@ -59,6 +59,7 @@
                   :label="categoryName"
                   :options="options"
                   :defaultValue="getDefaultFilterValue(categoryName, options)"
+                  :warningOptions="getInvalidOptions(categoryName)"
                   @selection-changed="(value) => handleFilterChanged(categoryName, value)"
                 />
               </div>
@@ -124,12 +125,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Selection from './selection.vue'
 import Checkbox from './checkbox.vue'
 import InputField from './input-field.vue'
 import { colorSchemes } from '../config/types.ts'
 import type { MapConfig } from '../config/types.ts'
+import type { ValidFilterLookup } from '../mapManager.ts'
 
 const schemeNames: string[] = [...colorSchemes]
 
@@ -137,6 +139,7 @@ const props = defineProps<{
   availableFilterOptions?: Record<string, any>
   config?: MapConfig
   loading?: boolean
+  validFilterLookup?: ValidFilterLookup
 }>()
 
 const emit = defineEmits([
@@ -144,11 +147,57 @@ const emit = defineEmits([
   'map-config-changed'
 ])
 
+// Track the current selected filters
+const selectedFilters = ref<Record<string, string>>({})
+
+// Initialize selected filters when availableFilterOptions changes
+watch(
+  () => props.availableFilterOptions,
+  (newOptions) => {
+    if (!newOptions) return
+
+    const newFilters: Record<string, string> = {}
+    for (const categoryName in newOptions) {
+      newFilters[categoryName] = getDefaultFilterValue(categoryName, newOptions[categoryName])
+    }
+    selectedFilters.value = newFilters
+  },
+  { immediate: true, deep: true }
+)
+
+// Also sync with config changes from parent
+watch(
+  () => props.config?.filter,
+  (newFilter) => {
+    if (newFilter) {
+      selectedFilters.value = { ...newFilter }
+    }
+  },
+  { deep: true }
+)
+
 const hasFilterOptions = computed(() =>
   props.availableFilterOptions && Object.keys(props.availableFilterOptions).length > 0
 )
 
-function getDefaultFilterValue (categoryName: string, options: string) {
+// Compute invalid options for each category based on current selected filters
+const invalidOptionsByCategory = computed(() => {
+  if (!props.validFilterLookup || !props.availableFilterOptions) {
+    return {}
+  }
+
+  const result: Record<string, string[]> = {}
+
+  for (const categoryName in props.availableFilterOptions) {
+
+    const options = props.availableFilterOptions[categoryName]
+    const validOptions = props.validFilterLookup.lookup(selectedFilters.value, categoryName)
+    result[categoryName] = options.filter((option: string) => !validOptions.includes(option))
+  }
+  return result
+})
+
+function getDefaultFilterValue (categoryName: string, options: string[]) {
   if (
     props.config?.filter !== undefined &&
     Object.prototype.hasOwnProperty.call(props.config.filter, categoryName)
@@ -158,7 +207,18 @@ function getDefaultFilterValue (categoryName: string, options: string) {
   return options?.[0]
 }
 
+function getInvalidOptions(categoryName: string): string[] {
+  return invalidOptionsByCategory.value[categoryName] || []
+}
+
 function handleFilterChanged (categoryName: string, value: string) {
+  // Update local state
+  selectedFilters.value = {
+    ...selectedFilters.value,
+    [categoryName]: value
+  }
+
+  // Emit to parent
   emit('filter-changed', categoryName, value)
 }
 
