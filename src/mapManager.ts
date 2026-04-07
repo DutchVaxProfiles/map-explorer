@@ -5,13 +5,17 @@ import { Processor } from "./processors/processor"
 import type { MapConfig } from "./config/types"
 import { fetchPublicFile } from "./helpers"
 
-export interface LoadedMapState {
+export type FilterLookup = {
+  lookup(knownValues: Record<string, string>, targetKey: string): string[]
+}
+
+export type LoadedMapState = {
   geojsonData: GeoJSON
   dataProcessor: Processor
   regionData: RegionData[]
   availableFilterOptions: { [key: string]: string[] }
   selectedFilters: { [key: string]: string }
-  validFilterLookup: ValidFilterLookup
+  validFilterLookup: FilterLookup
 }
 
 type MapKey = string

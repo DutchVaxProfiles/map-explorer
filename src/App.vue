@@ -125,7 +125,7 @@ import { Processor } from "./processors/processor"
 import { mapConfigs } from "./config/loader"
 import type { MapConfig } from "./config/types"
 import { MapManager } from "./mapManager"
-import type { ValidFilterLookup } from "./mapManager"
+import type { FilterLookup } from "./mapManager"
 
 // UI toggles
 const showInfo = ref(false)
@@ -140,7 +140,7 @@ const regionData = ref<RegionData[] | undefined>(undefined)
 const selectedLegendColor = ref<string>("")
 const config = ref<MapConfig | undefined>(undefined)
 const configs = ref<MapConfig[]>([])
-const validFilterLookup = ref<ValidFilterLookup | undefined>(undefined)
+const validFilterLookup = ref<FilterLookup | undefined>(undefined)
 
 
 // Filter state

@@ -1,4 +1,4 @@
-export interface RegionData {
+export type RegionData = {
   regionId: string
   value: number
 }

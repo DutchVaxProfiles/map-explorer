@@ -131,7 +131,7 @@ import Checkbox from './checkbox.vue'
 import InputField from './input-field.vue'
 import { colorSchemes } from '../config/types.ts'
 import type { MapConfig } from '../config/types.ts'
-import type { ValidFilterLookup } from '../mapManager.ts'
+import type { FilterLookup } from '../mapManager.ts'
 
 const schemeNames: string[] = [...colorSchemes]
 
@@ -139,7 +139,7 @@ const props = defineProps<{
   availableFilterOptions?: Record<string, any>
   config?: MapConfig
   loading?: boolean
-  validFilterLookup?: ValidFilterLookup
+  validFilterLookup?: FilterLookup
 }>()
 
 const emit = defineEmits([

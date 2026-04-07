@@ -60,11 +60,11 @@ export async function getRegionData(
   datasetName: string
 ): Promise<RegionData[]> {
 
-  const filter_clause = Object.entries(selectedCategoryValues)
-    .map(([category_col, value]) =>
+  const filterClause = Object.entries(selectedCategoryValues)
+    .map(([categoryCol, value]) =>
       value === MISSING_LABEL
-        ? `${category_col} IS NULL`
-        : `${category_col} = '${value}'`
+        ? `${categoryCol} IS NULL`
+        : `${categoryCol} = '${value}'`
     )
     .join(" AND ")
 
@@ -75,7 +75,7 @@ export async function getRegionData(
     FROM
       ${readFunction}('${datasetName}')
     WHERE
-      ${filter_clause}
+      ${filterClause}
   `
   const out = await executeQuery(query) as RegionData[]
   return out
