@@ -59,7 +59,7 @@ Your map will be displayed on the Github page of your fork and you can share it 
 
 ### Configuration Modes
 
-map-explorer can be configure by changing or adding configuration files in `/src/config/map-configs`.
+map-explorer can be configure by changing or adding configuration files in `/src/map-config/map-configs`.
 
 The application currently supports one distinct configuration mode, determined by the `kind` field:
 
@@ -151,7 +151,7 @@ The following color schemes are available:
 
 #### Multiple maps
 
-You can add multiple maps by adding multiple configuration files in the `/src/config/map-configs` folder. 
+You can add multiple maps by adding multiple configuration files in the `/src/map-config/map-configs` folder. 
 If you have multiple configuration files, you will be able to select your different maps through a dialog.
 
 

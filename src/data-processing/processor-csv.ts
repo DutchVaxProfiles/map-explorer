@@ -1,7 +1,7 @@
 import {
   registerFile,
   initializeDuckDB,
-} from "../duckdb"
+} from "./duckdb"
 import { Processor } from "./processor"
 import type { RegionData } from "./types"
 import {

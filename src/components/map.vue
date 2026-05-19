@@ -37,21 +37,21 @@
 // When adding new code to this component add types for bespoke code
 
 import Button from "./button.vue"
-import ResetIcon from "./icons/ResetIcon.vue"
+import ResetIcon from "./icons/reset-icon.vue"
 
 import { ref, onMounted, watch, onUnmounted } from 'vue'
 import * as d3 from 'd3'
 import { createPopper } from '@popperjs/core'
 import {
   createMapColor,
-} from "../map_color"
+} from "../map/color"
 import type { GeoJSON } from "geojson"
 // @ts-ignore: does not have declaration file, dont care, see comment above
 import rewind from '@mapbox/geojson-rewind';
 import type {
   MapConfig
-} from "../config/types"
-import type { RegionData } from "../processors/types"
+} from "../map-config/types"
+import type { RegionData } from "../data-processing/types"
 
 interface Props {
   geojson: GeoJSON

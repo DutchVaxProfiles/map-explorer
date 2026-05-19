@@ -1,10 +1,10 @@
 import * as d3 from 'd3'
-import type { RegionData } from './processors/types'
+import type { RegionData } from '../data-processing/types'
 import type {
   MapColorConfig,
   ColorScheme,
   MapConfig,
-} from './config/types'
+} from '../map-config/types'
 
 export class MapColor {
   private readonly thresholds: number[]

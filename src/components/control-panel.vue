@@ -129,9 +129,9 @@ import { computed, ref, watch } from 'vue'
 import Selection from './selection.vue'
 import Checkbox from './checkbox.vue'
 import InputField from './input-field.vue'
-import { colorSchemes } from '../config/types.ts'
-import type { MapConfig } from '../config/types.ts'
-import type { FilterLookup } from '../mapManager.ts'
+import { colorSchemes } from '../map-config/types.ts'
+import type { MapConfig } from '../map-config/types.ts'
+import type { FilterLookup } from '../map/manager'
 
 const schemeNames: string[] = [...colorSchemes]
 

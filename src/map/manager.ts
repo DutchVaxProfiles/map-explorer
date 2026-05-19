@@ -1,9 +1,9 @@
 import type { GeoJSON } from "geojson"
-import type { RegionData } from "./processors/types"
-import { ProcessorFactory } from "./processors/processor_factory"
-import { Processor } from "./processors/processor"
-import type { MapConfig } from "./config/types"
-import { fetchPublicFile } from "./helpers"
+import type { RegionData } from "../data-processing/types"
+import { ProcessorFactory } from "../data-processing/processor-factory"
+import { Processor } from "../data-processing/processor"
+import type { MapConfig } from "../map-config/types"
+import { fetchPublicFile } from "../helpers"
 
 export type FilterLookup = {
   lookup(knownValues: Record<string, string>, targetKey: string): string[]
@@ -197,4 +197,3 @@ export class ValidFilterLookup {
     return Array.from(index.get(compositeKey) || [])
   }
 }
-

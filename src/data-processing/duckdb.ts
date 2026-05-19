@@ -4,7 +4,7 @@ import mvp_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?ur
 import duckdb_wasm_next from '@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url'
 import eh_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url'
 
-import type { RegionData } from './processors/types'
+import type { RegionData } from './types'
 
 const MANUAL_BUNDLES = {
     mvp: {

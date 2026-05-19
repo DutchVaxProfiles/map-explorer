@@ -21,17 +21,17 @@ Map Explorer is a **fully browser-based** geographic data visualization tool. It
 
 ### Key layers
 
-**Configuration system** (`src/config/`)
-- Map configs are JSON files in `src/config/map-configs/`. Files prefixed with `_` are ignored.
-- Loaded via `import.meta.glob` at build time and validated at runtime against a **Zod schema** (`config/types.ts`).
+**Configuration system** (`src/map-config/`)
+- Map configs are JSON files in `src/map-config/map-configs/`. Files prefixed with `_` are ignored.
+- Loaded via `import.meta.glob` at build time and validated at runtime against a **Zod schema** (`map-config/types.ts`).
 - Config shape: `kind`, `geojsonFileName`, `dataFileName`, `idColumnGeojson`, `idColumnDataFile`, `categoryColumns`, `valueColumn`, `mapColorConfig`, and optional `filter` defaults.
 
-**Data processing** (`src/processors/`)
+**Data processing** (`src/data-processing/`)
 - `ProcessorFactory` creates a `CsvProcessor` or `ParquetProcessor` depending on file extension.
 - Both extend the abstract `Processor` class. SQL query builders live in `processors/helpers.ts`.
-- DuckDB initialization and file registration is in `src/duckdb.ts`.
+- DuckDB initialization and file registration is in `src/data-processing/duckdb.ts`.
 
-**State management** (`src/mapManager.ts`)
+**State management** (`src/map-manager.ts`)
 - `MapManager` caches loaded map states (GeoJSON + processor + region data) across map switches.
 - `ValidFilterLookup` is an optimized index that prevents users from selecting invalid filter combinations.
 
@@ -41,7 +41,7 @@ Map Explorer is a **fully browser-based** geographic data visualization tool. It
 - `control-panel.vue` drives the filter/color controls.
 - Data flows unidirectionally: child components emit events → `App.vue` updates state → components re-render.
 
-**Color mapping** (`src/map_color.ts`)
+**Color mapping** (`src/map-color.ts`)
 - `MapColor` wraps D3 color interpolators. Supports 10+ schemes (viridis, plasma, etc.) with dynamic or fixed min/max scaling.
 
 ### Path alias
@@ -54,5 +54,5 @@ Map Explorer is a **fully browser-based** geographic data visualization tool. It
 - **Naming**: PascalCase for classes and Zod schemas (e.g. `MapColorConfigSchema`), camelCase for functions and variables, kebab-case for Vue component filenames (e.g. `control-panel.vue`), UPPER_SNAKE_CASE for module-level constants.
 - **Vue components**: Use `<script setup>` with the Composition API. Props are typed inline. Child components emit typed events; `App.vue` handles them — keep business logic out of leaf components.
 - **Async**: Use `async/await` throughout. Fire independent async operations in parallel with `Promise.all`.
-- **Comments**: Inline comments explain *why*, not *what*. Use block comments (with `/** */`) only for non-obvious classes or algorithms (see `ValidFilterLookup` in `mapManager.ts`).
+- **Comments**: Inline comments explain *why*, not *what*. Use block comments (with `/** */`) only for non-obvious classes or algorithms (see `ValidFilterLookup` in `map-manager.ts`).
 - **Zod**: Define schemas first, derive TypeScript types from them. Apply `.refine()` for cross-field validation on the schema itself.

@@ -1,6 +1,6 @@
 import { Processor } from "./processor"
-import { ParquetProcessor} from "./processor_parquet.ts"
-import { CsvProcessor } from "./processor_csv.ts"
+import { ParquetProcessor} from "./processor-parquet.ts"
+import { CsvProcessor } from "./processor-csv.ts"
 
 export class ProcessorFactory {
   static async create(file: File): Promise<Processor> {

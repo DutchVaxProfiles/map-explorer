@@ -24,9 +24,9 @@ import { ref, onMounted, watch } from 'vue'
 import * as d3 from 'd3'
 import {
   createMapColor
-} from '../map_color.ts'
-import type { RegionData } from '../processors/types'
-import type { MapConfig } from '../config/types'
+} from '../map/color'
+import type { RegionData } from '../data-processing/types'
+import type { MapConfig } from '../map-config/types'
 
 interface Props {
   regionData: RegionData[] | undefined

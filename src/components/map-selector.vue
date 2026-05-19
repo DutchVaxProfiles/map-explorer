@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import type { MapConfig } from '../config/types'
+import type { MapConfig } from '../map-config/types'
 
 interface Props {
   configs?: MapConfig[]

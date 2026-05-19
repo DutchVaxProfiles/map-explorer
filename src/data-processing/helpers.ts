@@ -1,4 +1,4 @@
-import { executeQuery } from "../duckdb"
+import { executeQuery } from "./duckdb"
 import type { RegionData } from "./types"
 
 const MISSING_LABEL = "Filter off"

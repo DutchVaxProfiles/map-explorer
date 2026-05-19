@@ -106,11 +106,11 @@
 import { ref, onMounted, watch } from "vue"
 
 // icons
-import BarchartIcon from "./components/icons/BarchartIcon.vue"
-import SettingsIcon from "./components/icons/SettingsIcon.vue"
-import InformationIcon from "./components/icons/InformationIcon.vue"
-import SwitchIcon from "./components/icons/SwitchIcon.vue"
-import LoadingMap from "./components/icons/LoadingMap.vue"
+import BarchartIcon from "./components/icons/barchart-icon.vue"
+import SettingsIcon from "./components/icons/settings-icon.vue"
+import InformationIcon from "./components/icons/information-icon.vue"
+import SwitchIcon from "./components/icons/switch-icon.vue"
+import LoadingMap from "./components/icons/loading-map.vue"
 
 // components
 import Map from "./components/map.vue"
@@ -120,12 +120,12 @@ import MapDescription from "./components/map-description.vue"
 import MapSelector from "./components/map-selector.vue"
 import Button from "./components/button.vue"
 
-import type { RegionData } from "./processors/types"
-import { Processor } from "./processors/processor"
-import { mapConfigs } from "./config/loader"
-import type { MapConfig } from "./config/types"
-import { MapManager } from "./mapManager"
-import type { FilterLookup } from "./mapManager"
+import type { RegionData } from "./data-processing/types"
+import { Processor } from "./data-processing/processor"
+import { mapConfigs } from "./map-config/loader"
+import type { MapConfig } from "./map-config/types"
+import { MapManager } from "./map/manager"
+import type { FilterLookup } from "./map/manager"
 
 // UI toggles
 const showInfo = ref(false)
