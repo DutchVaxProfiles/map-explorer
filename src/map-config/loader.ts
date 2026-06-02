@@ -2,7 +2,7 @@ import { MapConfigSchema } from "./types.ts"
 import type { MapConfig } from "./types.ts"
 
 
-const jsonModules = import.meta.glob("./map-configs/!(_)*.json", {
+const jsonModules = import.meta.glob(["./map-configs/*.json", "!./map-configs/_*.json"], {
   eager: true
 })
 
@@ -29,3 +29,5 @@ export function validateMapConfig(input: unknown): MapConfig {
 export const mapConfigs: MapConfig[] = Object.values(jsonModules).map(
   (mod) => validateMapConfig((mod as RawJsonModule).default)
 )
+
+console.log(`[App Config Loader] found ${mapConfigs.length} config(s):`, mapConfigs.map(c => c.mapDescription.title))
