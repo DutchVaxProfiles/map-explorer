@@ -1,0 +1,20 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {"statcode": "BU0001", "statnaam": "Fixture buurt 1"},
+      "geometry": {"type": "Polygon", "coordinates": [[[5.0, 52.0], [5.1, 52.0], [5.1, 52.1], [5.0, 52.1], [5.0, 52.0]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"statcode": "BU0002", "statnaam": "Fixture buurt 2"},
+      "geometry": {"type": "Polygon", "coordinates": [[[5.2, 52.0], [5.3, 52.0], [5.3, 52.1], [5.2, 52.1], [5.2, 52.0]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"statcode": "BU9999", "statnaam": "No data buurt"},
+      "geometry": {"type": "Polygon", "coordinates": [[[5.4, 52.0], [5.5, 52.0], [5.5, 52.1], [5.4, 52.1], [5.4, 52.0]]]}
+    }
+  ]
+}

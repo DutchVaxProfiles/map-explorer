@@ -1,0 +1,11 @@
+{
+  "preview_placeholder": true,
+  "geo_year_label": "2026 preview",
+  "source_geometry": "vaxprofiles/map-explorer public/buurt_2024.geojson copied as temporary preview geometry",
+  "features": 14574,
+  "features_with_added_name": 4574,
+  "regions_with_fake_values": 14072,
+  "csv_rows": 70360,
+  "missing_region_count": 502,
+  "note": "Synthetic placeholder values for conference demonstration only. Do not interpret as model results."
+}
