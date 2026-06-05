@@ -78,20 +78,12 @@
 
             <div>
               <Selection
-                :label="'Map colour palette'"
+                :label="'Colour scale'"
                 :options="schemeNames"
                 :defaultValue="config.mapColorConfig?.colorScheme"
+                :optionLabels="schemeLabels"
                 @selection-changed="handleColorSchemeChanged"
               />
-
-              <Checkbox
-                class="mt-3"
-                label="Invert colour palette"
-                :defaultValue="config.mapColorConfig?.colorSchemeInverted"
-                @checkbox-changed="handleColorSchemeInvertedChanged"
-              >
-                Put darker colours at the other end of the scale
-              </Checkbox>
 
               <Checkbox
                 class="mt-3"
@@ -130,11 +122,12 @@ import { computed, ref, watch } from 'vue'
 import Selection from './selection.vue'
 import Checkbox from './checkbox.vue'
 import InputField from './input-field.vue'
-import { colorSchemes } from '../map-config/types.ts'
+import { colorSchemes, colorSchemeLabels } from '../map-config/types.ts'
 import type { MapConfig } from '../map-config/types.ts'
 import type { FilterLookup } from '../map/manager'
 
 const schemeNames: string[] = [...colorSchemes]
+const schemeLabels: Record<string, string> = colorSchemeLabels
 
 const props = defineProps<{
   availableFilterOptions?: Record<string, any>
@@ -231,10 +224,6 @@ function handleMapConfigChange (field: string, value: any) {
 
 function handleColorSchemeChanged (value: string) {
   handleMapConfigChange('colorScheme', value)
-}
-
-function handleColorSchemeInvertedChanged (value: boolean) {
-  handleMapConfigChange('colorSchemeInverted', value)
 }
 
 function handleDynamicLegendChanged (value: boolean) {

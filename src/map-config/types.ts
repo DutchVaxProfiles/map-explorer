@@ -1,19 +1,15 @@
 import { z } from "zod";
 
 export const colorSchemes = [
-  "viridis",
-  "plasma",
-  "inferno",
   "magma",
-  "cividis",
-  "turbo",
-  "warm",
-  "cool",
-  "coolwarm",
-  "cubehelix",
-  "no colorscheme"
+  "coolwarm"
 ] as const;
 export type ColorScheme = (typeof colorSchemes)[number];
+
+export const colorSchemeLabels: Record<ColorScheme, string> = {
+  magma: "sequential",
+  coolwarm: "divergent",
+};
 
 export const MapDescriptionSchema = z.object({
   title: z.string(),
@@ -27,7 +23,6 @@ export const MapColorConfigSchema = z.object({
   numBins: z.number().int().positive().optional(),
   colorScheme: z.enum(colorSchemes).optional(),
   dynamic: z.boolean().optional(),
-  colorSchemeInverted: z.boolean().optional(),
 }).refine(
   v => v.minValue <= v.maxValue,
   { message: "minValue must be <= maxValue", path: ["minValue"] }

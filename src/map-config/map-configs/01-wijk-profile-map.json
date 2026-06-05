@@ -27,9 +27,8 @@
     "minValue": 0,
     "maxValue": 100,
     "numBins": 7,
-    "colorScheme": "viridis",
-    "dynamic": true,
-    "colorSchemeInverted": false
+    "colorScheme": "magma",
+    "dynamic": true
   },
   "filter": {
     "profile": "1"

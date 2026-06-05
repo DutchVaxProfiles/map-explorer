@@ -331,13 +331,13 @@ function renderMap() {
     .data(correctedGeojson.features)
     .join('path')
     .attr('d', pathGenerator)
-    .attr('stroke', mapColor.getBorderColor())
+    .attr('stroke', '#FFFFFF')
     .attr('stroke-width', 0.5)
     .attr('fill', 'transparent');
 
 // Setup zoom behavior
   zoomBehavior = d3.zoom()
-    .scaleExtent([0.8, 12])
+    .scaleExtent([0.8, 24])
     .on('start', () => {
       // Hide tooltip when zooming
       if (activeRegion.value && isMobile.value) {

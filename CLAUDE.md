@@ -42,7 +42,7 @@ Map Explorer is a **fully browser-based** geographic data visualization tool. It
 - Data flows unidirectionally: child components emit events → `App.vue` updates state → components re-render.
 
 **Color mapping** (`src/map-color.ts`)
-- `MapColor` wraps D3 color interpolators. Supports 10+ schemes (viridis, plasma, etc.) with dynamic or fixed min/max scaling.
+- `MapColor` wraps the two project colour modes: sequential (`magma`, reversed so darker colours indicate higher values) and divergent (`coolwarm`). The scale can use dynamic or fixed min/max values.
 
 ### Path alias
 

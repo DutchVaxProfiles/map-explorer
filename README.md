@@ -134,9 +134,8 @@ Use this mode when you have a separate data file (e.g., CSV or parquet file) tha
   "mapColorConfig": {
     "minValue": 0,
     "maxValue": 0.4,
-    "colorScheme": "viridis",
-    "dynamic": false,
-    "colorSchemeInverted": false
+    "colorScheme": "magma",
+    "dynamic": false
   },
   "filter": {
     "year": "1918",
@@ -164,24 +163,15 @@ The `mapColorConfig` object controls how numeric values are mapped to colors on 
 - **`minValue`** (required, number): The minimum value for the color scale.
 - **`maxValue`** (required, number): The maximum value for the color scale.
 - **`numBins`** (optional, positive integer): Number of discrete color bins to use.
-- **`colorScheme`** (optional, string): The color scheme to apply. If not specified, defaults to a standard scheme
+- **`colorScheme`** (optional, string): The color scheme to apply. If not specified, defaults to the sequential scheme.
 - **`dynamic`** (optional, boolean): If `true`, the color scale adjusts dynamically based on the current filtered data. If `false` or not specified, uses the fixed `minValue` and `maxValue`
-- **`colorSchemeInverted`** (optional, boolean): If `true`, inverts the color scheme (reverses the color order)
 
 ##### Available Color Schemes
 
 The following color schemes are available:
 
-- `viridis` - Perceptually uniform, colorblind-friendly (purple to yellow)
-- `plasma` - Perceptually uniform (purple to pink to yellow)
-- `inferno` - Perceptually uniform (black to purple to yellow)
-- `magma` - Perceptually uniform (black to purple to white)
-- `cividis` - Colorblind-optimized, blue to yellow
-- `turbo` - Rainbow-like, high contrast
-- `warm` - Warm colors (dark red to yellow)
-- `cool` - Cool colors (cyan to magenta)
-- `cubehelix` - Perceptually uniform spiral through color space
-- `no colorscheme` - No color scheme applied
+- `magma` - shown in the interface as `sequential`; darker colours indicate higher values.
+- `coolwarm` - shown in the interface as `divergent`; red and blue mark opposite ends of the scale.
 
 #### Multiple maps
 

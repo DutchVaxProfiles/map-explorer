@@ -84,7 +84,7 @@
             <SettingsIcon />
           </Button>
           <div
-            class="absolute top-full right-0 mt-2 overflow-y-auto card-box bg-white w-75 max-h-[80dvh]"
+            class="absolute top-full right-0 mt-2 overflow-y-auto card-box bg-white w-[22rem] max-w-[calc(100vw-2rem)] max-h-[80dvh]"
             v-show="showControls"
           >
             <ControlPanel
@@ -130,7 +130,7 @@ import type { FilterLookup } from "./map/manager"
 // UI toggles
 const showInfo = ref(false)
 const showLegend = ref(true)
-const showControls = ref(false)
+const showControls = ref(true)
 const showMapSelector = ref(false)
 
 // App state

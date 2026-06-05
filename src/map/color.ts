@@ -11,9 +11,8 @@ export class MapColor {
   private readonly colors: string[]
   private readonly borderColor: string
   private readonly colorScheme: ColorScheme
-  private readonly colorSchemeInverted: boolean
 
-  constructor({ minValue, maxValue, numBins = 7, colorScheme = "viridis", colorSchemeInverted = false }: MapColorConfig) {
+  constructor({ minValue, maxValue, numBins = 7, colorScheme = "magma" }: MapColorConfig) {
     const bins = Math.max(1, Math.floor(numBins))
     const lo = Math.min(minValue, maxValue)
     const hi = Math.max(minValue, maxValue)
@@ -22,56 +21,21 @@ export class MapColor {
 
     this.thresholds = Array.from({ length: bins + 1 }, (_, i) => lo + i * binSize)
     this.colorScheme = colorScheme
-    this.colorSchemeInverted = colorSchemeInverted
     this.borderColor = this.getOptimalBorderColor()
 
-    if (colorScheme === "no colorscheme") {
-      this.colors = Array.from({ length: bins }, () => this.colorSchemeInverted ? '#000000' : '#FFFFFF')
-    } else {
-      const colorInterpolator = this.getColorInterpolator()
-      this.colors = Array.from({ length: bins }, (_, i) => colorInterpolator((i + 0.5) / bins))
-
-      // check if colors need to be reversed
-      if (this.colorSchemeInverted) {
-        this.colors.reverse()
-      }
-    }
+    const colorInterpolator = this.getColorInterpolator()
+    this.colors = Array.from({ length: bins }, (_, i) => colorInterpolator((i + 0.5) / bins))
   }
 
   private getOptimalBorderColor(): string {
-    const darkSchemes: ColorScheme[] = ['inferno', 'magma', 'plasma', 'viridis', 'turbo', 'cubehelix', 'cividis']
-    const lightSchemes: ColorScheme[] = ['warm', 'cool']
-
-    let borderColor = '#000000' // Default for 'no colorscheme' and unknown schemes
-
-    if (this.colorScheme && darkSchemes.includes(this.colorScheme)) {
-      borderColor = '#FFFFFF'
-    } else if (this.colorScheme && lightSchemes.includes(this.colorScheme)) {
-      borderColor = '#000000'
-    }
-
-    // Invert border color if color scheme is inverted
-    if (this.colorSchemeInverted) {
-      borderColor = borderColor === '#FFFFFF' ? '#000000' : '#FFFFFF'
-    }
-
-    return borderColor
+    return '#FFFFFF'
   }
 
   private getColorInterpolator(): (t: number) => string {
     switch (this.colorScheme) {
-      case 'viridis':     return d3.interpolateViridis
-      case 'plasma':      return d3.interpolatePlasma
-      case 'inferno':     return d3.interpolateInferno
-      case 'magma':       return d3.interpolateMagma
-      case 'cividis':     return d3.interpolateCividis
-      case 'turbo':       return d3.interpolateTurbo
-      case 'warm':        return d3.interpolateWarm
-      case 'cool':        return d3.interpolateCool
+      case 'magma':       return (t: number) => d3.interpolateMagma(1 - t)
       case 'coolwarm':    return d3.interpolateRdBu
-      case 'cubehelix':   return d3.interpolateCubehelixDefault
-      case 'no colorscheme': return () => '#FFFFFF'
-      default:            return d3.interpolateViridis
+      default:            return (t: number) => d3.interpolateMagma(1 - t)
     }
   }
 
@@ -111,7 +75,7 @@ export function createMapColor(
         minValue: minValue,
         maxValue: maxValue,
         colorScheme: config.mapColorConfig.colorScheme,
-        colorSchemeInverted: config.mapColorConfig.colorSchemeInverted
+        numBins: config.mapColorConfig.numBins,
       })
     }
     default:
