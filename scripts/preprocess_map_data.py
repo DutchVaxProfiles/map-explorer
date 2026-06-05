@@ -2,8 +2,8 @@
 """Prepare DutchVaxProfiles map data for Map Explorer.
 
 The script converts one wide CBS/export CSV with profile_1..profile_5 columns
-into the long CSV format expected by Map Explorer, then filters a CBS buurt
-GeoJSON to only the regions present in the data.
+into the long CSV format expected by Map Explorer, then filters a CBS GeoJSON
+to only the regions present in the data.
 """
 
 from __future__ import annotations
@@ -19,6 +19,13 @@ from typing import Dict, Iterable, List, Sequence, Tuple
 PROFILE_COLUMNS = [f"profile_{i}" for i in range(1, 6)]
 OPTIONAL_FILTER_COLUMNS = ["gender"]
 GEOGRAPHY = {
+    "wijk": {
+        "input_code_column": "wijk_code",
+        "geojson_id_column": "statcode",
+        "output_csv": "wijk_5_processed.csv",
+        "output_geojson": "wijk_{year}.geojson",
+        "output_alias_columns": {"wijk": "wijk_code"},
+    },
     "buurt": {
         "input_code_column": "buurt_code",
         "geojson_id_column": "statcode",
@@ -41,8 +48,8 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument(
         "--geo-level",
         choices=sorted(GEOGRAPHY),
-        default="buurt",
-        help="Geographic level to publish. MVP supports buurt.",
+        default="wijk",
+        help="Geographic level to publish.",
     )
     parser.add_argument("--geo-year", default="2026", help="CBS geometry year.")
     parser.add_argument(
@@ -236,10 +243,10 @@ def filter_geojson(
     unmatched = sorted(code_set - geo_codes)
     unmatched_share = len(unmatched) / max(len(code_set), 1)
     if unmatched_share > max_unmatched_share:
-        preview = ", ".join(unmatched[:10])
+        examples = ", ".join(unmatched[:10])
         raise PreprocessError(
             f"{len(unmatched)} of {len(code_set)} regions did not join to GeoJSON "
-            f"({unmatched_share:.1%}). Examples: {preview}"
+            f"({unmatched_share:.1%}). Examples: {examples}"
         )
 
     output_geojson = dict(geojson)

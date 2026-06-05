@@ -5,11 +5,14 @@ long CSV and filtered GeoJSON expected by Map Explorer.
 
 ## Input
 
-The conference MVP supports buurt-level output. The raw CSV must contain:
+The current map uses wijk-level output. The raw CSV must contain:
 
-- `buurt_code`, for example `BU01935100`
+- `wijk_code`, for example `WK034400`
 - `n_sample`
 - `profile_1`, `profile_2`, `profile_3`, `profile_4`, `profile_5`
+
+The same command also supports buurt-level output by using `--geo-level buurt`
+and a `buurt_code` column.
 
 Optional column:
 
@@ -23,35 +26,39 @@ The script writes percentages.
 ```bash
 uv run python scripts/preprocess_map_data.py \
   --input data/raw/profile_export.csv \
-  --geo-level buurt \
+  --geo-level wijk \
   --geo-year 2026 \
-  --geojson data/geo/buurt_2026.geojson \
+  --geojson data/geo/wijk_2026.geojson \
   --output-public public
 ```
 
 If `--geojson` is omitted, the script looks for
-`data/geo/buurt_<geo-year>.geojson`.
+`data/geo/<geo-level>_<geo-year>.geojson`.
 
 ## Output
 
-- `public/buurt_5_processed.csv`
-- `public/buurt_2026.geojson`
+For `--geo-level wijk`, the script writes:
+
+- `public/wijk_5_processed.csv`
+- `public/wijk_2026.geojson`
 - `public/preprocess_report.json`
 
-The processed CSV schema is:
+The processed wijk CSV schema is:
 
 - `profile`
-- `buurt_code`
-- `buren` (compatibility alias used by the earlier vaxprofiles fork)
+- `wijk_code`
+- `wijk` (compatibility alias used by the earlier vaxprofiles fork)
 - `value`
 - `n_sample`
 - optional filter columns such as `gender`
 
-The map config joins GeoJSON `properties.statcode` to CSV `buurt_code`.
+For `--geo-level buurt`, the equivalent files are
+`public/buurt_5_processed.csv` and `public/buurt_2026.geojson`, with `buren`
+as the compatibility alias.
 
 ## Checks
 
 The script fails when required columns are missing, profile values do not sum
 to about 100, duplicates exist for a region/filter combination, values fall
-outside the expected range, or more than 5% of input buurt codes do not join to
-the GeoJSON.
+outside the expected range, or more than 5% of input region codes do not join
+to the GeoJSON.

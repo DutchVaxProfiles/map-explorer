@@ -13,14 +13,14 @@ FIXTURES = ROOT / "tests" / "fixtures"
 
 
 class PreprocessMapDataTest(TestCase):
-    def run_script(self, input_csv, geojson, output_dir, extra_args=None):
+    def run_script(self, input_csv, geojson, output_dir, extra_args=None, geo_level="buurt"):
         command = [
             sys.executable,
             str(SCRIPT),
             "--input",
             str(input_csv),
             "--geo-level",
-            "buurt",
+            geo_level,
             "--geo-year",
             "2026",
             "--geojson",
@@ -58,6 +58,32 @@ class PreprocessMapDataTest(TestCase):
             self.assertEqual(report["compatibility_columns"], ["buren"])
             self.assertEqual(report["output_geojson_features"], 2)
             self.assertEqual(report["geojson_regions_without_data"], 1)
+
+    def test_converts_wijk_export_with_wijk_alias(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = self.run_script(
+                FIXTURES / "raw_wijk_profiles.csv",
+                FIXTURES / "wijk_2026.geojson",
+                Path(tmpdir),
+                geo_level="wijk",
+            )
+
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+            output_csv = Path(tmpdir) / "wijk_5_processed.csv"
+            with output_csv.open(newline="", encoding="utf-8") as handle:
+                rows = list(csv.DictReader(handle))
+
+            self.assertEqual(len(rows), 10)
+            self.assertEqual(rows[0]["profile"], "1")
+            self.assertEqual(rows[0]["wijk_code"], "WK0001")
+            self.assertEqual(rows[0]["wijk"], "WK0001")
+            self.assertEqual(rows[0]["value"], "25")
+
+            report = json.loads((Path(tmpdir) / "preprocess_report.json").read_text())
+            self.assertEqual(report["geo_level"], "wijk")
+            self.assertEqual(report["compatibility_columns"], ["wijk"])
+            self.assertEqual(report["output_geojson_features"], 2)
 
     def test_rejects_profile_values_that_do_not_sum_to_100(self):
         with tempfile.TemporaryDirectory() as tmpdir:

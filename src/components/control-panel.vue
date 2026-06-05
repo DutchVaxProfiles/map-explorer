@@ -47,7 +47,7 @@
           <!-- Filter Options -->
           <div>
             <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-3">
-              Filter Options
+              Choose what the map shows
             </h3>
 
             <div v-if="hasFilterOptions" class="space-y-4">
@@ -56,9 +56,10 @@
                 :key="categoryName"
               >
                 <Selection
-                  :label="categoryName"
+                  :label="getFilterLabel(categoryName)"
                   :options="options"
                   :defaultValue="getDefaultFilterValue(categoryName, options)"
+                  :optionLabels="getFilterOptionLabels(categoryName)"
                   :warningOptions="getInvalidOptions(categoryName)"
                   @selection-changed="(value) => handleFilterChanged(categoryName, value)"
                 />
@@ -72,12 +73,12 @@
 
           <!-- Map Options -->
           <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-3 mt-6">
-            Map Options
+            Colour and legend
           </h3>
 
             <div>
               <Selection
-                :label="'Color Scheme'"
+                :label="'Map colour palette'"
                 :options="schemeNames"
                 :defaultValue="config.mapColorConfig?.colorScheme"
                 @selection-changed="handleColorSchemeChanged"
@@ -85,25 +86,25 @@
 
               <Checkbox
                 class="mt-3"
-                label="Invert Color Scheme"
+                label="Invert colour palette"
                 :defaultValue="config.mapColorConfig?.colorSchemeInverted"
                 @checkbox-changed="handleColorSchemeInvertedChanged"
               >
-                Invert color scheme
+                Put darker colours at the other end of the scale
               </Checkbox>
 
               <Checkbox
                 class="mt-3"
-                label="Dynamic Legend"
+                label="Fit legend to selected group"
                 :defaultValue="config.mapColorConfig?.dynamic"
                 @checkbox-changed="handleDynamicLegendChanged"
               >
-                Calculate the min and max from the data
+                Calculate the minimum and maximum from the current selection
               </Checkbox>
 
               <InputField
                 class="mt-3"
-                label="Legend Minimum"
+                label="Minimum share (%)"
                 :defaultValue="config.mapColorConfig?.minValue"
                 :disabled="config.mapColorConfig?.dynamic"
                 placeholder="0.00"
@@ -112,7 +113,7 @@
 
               <InputField
                 class="mt-3"
-                label="Legend Maximum"
+                label="Maximum share (%)"
                 :defaultValue="config.mapColorConfig?.maxValue"
                 :disabled="config.mapColorConfig?.dynamic"
                 placeholder="1.00"
@@ -198,6 +199,14 @@ function getDefaultFilterValue (categoryName: string, options: string[]) {
 
 function getInvalidOptions(categoryName: string): string[] {
   return invalidOptionsByCategory.value[categoryName] || []
+}
+
+function getFilterLabel(categoryName: string): string {
+  return props.config?.categoryLabels?.[categoryName] || categoryName
+}
+
+function getFilterOptionLabels(categoryName: string): Record<string, string> {
+  return props.config?.categoryOptionLabels?.[categoryName] || {}
 }
 
 function handleFilterChanged (categoryName: string, value: string) {

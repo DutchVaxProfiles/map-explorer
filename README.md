@@ -1,33 +1,36 @@
 # DutchVaxProfiles Map Explorer
 
 This repository is the DutchVaxProfiles map app, built from the current
-`sodascience/map-explorer` upstream. The conference MVP uses one active map
+`sodascience/map-explorer` upstream. The current app uses one active map
 configuration:
 
-- `src/map-config/map-configs/01-buurt-profile-map.json`
+- `src/map-config/map-configs/01-wijk-profile-map.json`
 
 The app expects these generated files in `public/`:
 
-- `buurt_5_processed.csv`
-- `buurt_2026.geojson`
+- `wijk_5_processed.csv`
+- `wijk_2024.geojson`
 - `preprocess_report.json`
 
-A synthetic five-profile preview is included for the conference demo; see
-`public/README-preview-data.md`.
+Interim five-profile wijk data from the earlier map fork are included while the
+final CBS-linked model output is being prepared; see
+`public/README-interim-wijk-data.md`.
 
-Generate them from a raw CBS/export CSV and a CBS buurt GeoJSON:
+Generate final files from a raw CBS/export CSV and a CBS wijk GeoJSON:
 
 ```sh
 uv run python scripts/preprocess_map_data.py \
   --input data/raw/profile_export.csv \
-  --geo-level buurt \
+  --geo-level wijk \
   --geo-year 2026 \
-  --geojson data/geo/buurt_2026.geojson \
+  --geojson data/geo/wijk_2026.geojson \
   --output-public public
 ```
 
-The raw CSV must contain `buurt_code`, `n_sample`, and `profile_1` through
+The raw CSV must contain `wijk_code`, `n_sample`, and `profile_1` through
 `profile_5`. See `scripts/README.md` for validation rules and output schema.
+If the final geometry year differs from the interim `wijk_2024.geojson`, update
+`geojsonFileName` in `01-wijk-profile-map.json` to match the generated file.
 
 ## Upstream Map Explorer
 

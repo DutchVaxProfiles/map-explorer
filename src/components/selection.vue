@@ -13,7 +13,7 @@
         :key="option"
         :value="option"
       >
-        {{ option }}{{ warningOptions.includes(option) ? ' (no data)' : '' }}
+        {{ optionLabels[option] || option }}{{ warningOptions.includes(option) ? ' (no data)' : '' }}
       </option>
     </select>
   </div>
@@ -27,9 +27,11 @@ const props = withDefaults(
     options: string[]
     label: string
     defaultValue?: string | null
+    optionLabels?: Record<string, string>
     warningOptions?: string[]
   }>(),
   {
+    optionLabels: () => ({}),
     warningOptions: () => []
   }
 )

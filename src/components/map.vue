@@ -337,7 +337,7 @@ function renderMap() {
 
 // Setup zoom behavior
   zoomBehavior = d3.zoom()
-    .scaleExtent([0.8, 5])
+    .scaleExtent([0.8, 12])
     .on('start', () => {
       // Hide tooltip when zooming
       if (activeRegion.value && isMobile.value) {

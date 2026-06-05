@@ -1,0 +1,20 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {"statcode": "WK0001", "statnaam": "Fixture wijk 1"},
+      "geometry": {"type": "Polygon", "coordinates": [[[4.8, 52.0], [4.9, 52.0], [4.9, 52.1], [4.8, 52.1], [4.8, 52.0]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"statcode": "WK0002", "statnaam": "Fixture wijk 2"},
+      "geometry": {"type": "Polygon", "coordinates": [[[5.0, 52.0], [5.1, 52.0], [5.1, 52.1], [5.0, 52.1], [5.0, 52.0]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"statcode": "WK9999", "statnaam": "No data wijk"},
+      "geometry": {"type": "Polygon", "coordinates": [[[5.2, 52.0], [5.3, 52.0], [5.3, 52.1], [5.2, 52.1], [5.2, 52.0]]]}
+    }
+  ]
+}

@@ -54,6 +54,8 @@ export const MapConfigSchema = z.discriminatedUnion("kind", [
     idColumnGeojson: z.string(),
     idColumnDataFile: z.string(),
     categoryColumns: z.array(z.string()),
+    categoryLabels: z.record(z.string(), z.string()).optional(),
+    categoryOptionLabels: z.record(z.string(), z.record(z.string(), z.string())).optional(),
     valueColumn: z.string(),
     legendTitle: z.string().optional(),
     mapColorConfig: MapColorConfigSchema,
