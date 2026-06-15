@@ -200,24 +200,39 @@ function getFilterOptionLabels(categoryName: string): Record<string, string> {
   return props.config?.categoryOptionLabels?.[categoryName] || {}
 }
 
-// Reset the selection whenever the active map (and therefore its options) changes.
+// Re-sync only when the active map changes (its title) — deliberately NOT a deep watch on
+// the whole config: that reran on every colour/legend tweak and wiped the chosen filters.
+// Selections that are still valid are kept, so they also persist across map switches.
 watch(
-  () => [props.config?.mapDescription.title, props.availableFilterOptions],
-  () => initSelection(),
-  { immediate: true, deep: true }
+  () => props.config?.mapDescription.title,
+  () => syncSelection(),
+  { immediate: true }
 )
 
-function initSelection() {
+function syncSelection() {
   if (!props.config) return
   const filter = props.config.filter ?? {}
-  selectedProfile.value = filter.profile ?? profileOptions.value[0] ?? ''
 
-  // Treat a demographic with a non-"All" default as the initially active breakdown.
-  const active = demographicColumns.value.find(
-    col => filter[col] !== undefined && filter[col] !== INACTIVE
-  )
-  selectedBreakdown.value = active ?? NO_BREAKDOWN
-  selectedValue.value = active !== undefined ? filter[active] : ''
+  // Keep the current choice when it is still valid on this map; otherwise fall back to the
+  // map's configured default.
+  if (!profileOptions.value.includes(selectedProfile.value)) {
+    selectedProfile.value = filter.profile ?? profileOptions.value[0] ?? ''
+  }
+
+  if (!breakdownOptions.value.includes(selectedBreakdown.value)) {
+    // A demographic with a non-"All" default counts as the initially active breakdown.
+    const active = demographicColumns.value.find(
+      col => filter[col] !== undefined && filter[col] !== INACTIVE
+    )
+    selectedBreakdown.value = active ?? NO_BREAKDOWN
+    selectedValue.value = active !== undefined ? filter[active] : ''
+  } else if (
+    selectedBreakdown.value !== NO_BREAKDOWN &&
+    !valueOptions.value.includes(selectedValue.value)
+  ) {
+    selectedValue.value = valueOptions.value[0] ?? ''
+  }
+
   emitFilters()
 }
 
