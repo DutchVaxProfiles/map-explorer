@@ -40,11 +40,16 @@ export class MapColor {
   }
 
   getBinColor(value: number | undefined): string {
-    if (value === undefined) return '#D3D3D3'
+    if (value === undefined || !Number.isFinite(value)) return '#D3D3D3'
+    if (value <= this.thresholds[0]) return this.colors[0]
+    if (value >= this.thresholds[this.thresholds.length - 1]) {
+      return this.colors[this.colors.length - 1]
+    }
+
     const i = this.thresholds.findIndex((t, j) =>
       value >= t && value < this.thresholds[j + 1]
     )
-    return this.colors[i >= 0 ? i : this.colors.length - 1]
+    return this.colors[i]
   }
 
   getThresholds() { return this.thresholds }
