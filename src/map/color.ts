@@ -12,7 +12,7 @@ export class MapColor {
   private readonly borderColor: string
   private readonly colorScheme: ColorScheme
 
-  constructor({ minValue, maxValue, numBins = 7, colorScheme = "magma" }: MapColorConfig) {
+  constructor({ minValue, maxValue, numBins = 7, colorScheme = "coolwarm" }: MapColorConfig) {
     const bins = Math.max(1, Math.floor(numBins))
     const lo = Math.min(minValue, maxValue)
     const hi = Math.max(minValue, maxValue)

@@ -90,7 +90,7 @@
     "minValue": 0,
     "maxValue": 100,
     "numBins": 7,
-    "colorScheme": "magma",
+    "colorScheme": "coolwarm",
     "dynamic": true
   },
   "filter": {
