@@ -84,10 +84,32 @@ let centerDot: any = null
 let connectorLine: any = null
 
 const FIXED_LINE_LENGTH = 50 // Fixed line length for tooltop (in pixels)
+const BASE_STROKE_WIDTH = 0.5
+const ACTIVE_STROKE_WIDTH = 1.5
 
 // Detect if device is mobile
 function checkIsMobile() {
   isMobile.value = window.matchMedia("(hover: none) and (pointer: coarse)").matches
+}
+
+function responsiveStrokeWidth(width: number) {
+  return width / Math.max(currentTransform?.k ?? 1, 1)
+}
+
+function escapeHtml(value: string) {
+  const entities: Record<string, string> = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  }
+
+  return value.replace(/[&<>"']/g, char => entities[char])
+}
+
+function getRegionName(d: any, regionId: string) {
+  return d?.properties?.statnaam || d?.properties?.name || d?.properties?.naam || regionId
 }
 
 const virtualElement: any = ref({
@@ -135,12 +157,13 @@ function showTooltip(element: any, d: any, regionId: any) {
   d3.select(element)
     .transition()
     .duration(100)
-    .attr("stroke-width", 1.5);
+    .attr("stroke-width", responsiveStrokeWidth(ACTIVE_STROKE_WIDTH));
 
   // Get region data for tooltip
   const regionDataMap = createRegionDataMap(props.regionData)
   const value = regionDataMap.get(regionId)?.value ?? "No data"
   const formattedValue = typeof value === 'number' ? value.toLocaleString() : value
+  const regionName = getRegionName(d, String(regionId))
 
   // Transform center coordinates to screen space
   const svgPoint = svgRef.value.createSVGPoint()
@@ -171,9 +194,8 @@ function showTooltip(element: any, d: any, regionId: any) {
       `absolute max-w-1/3 border-t-[4px] bg-white p-2 pointer-events-none text-sm z-50 ${boxClasses}`
     )
     .html(`
-      <div class="font-bold text-gray-800">Region: ${regionId}</div>
-      <div class="text-gray-600 mt-1">${d.properties.name || 'Unknown'}</div>
-      <div class="text-gray-600 mt-1">Value: ${formattedValue}</div>
+      <div class="font-bold text-gray-800">${escapeHtml(String(regionName))}</div>
+      <div class="text-gray-600 mt-1">Value: ${escapeHtml(String(formattedValue))}</div>
     `)
 
   // Update center dot position (in screen coordinates)
@@ -332,7 +354,7 @@ function renderMap() {
     .join('path')
     .attr('d', pathGenerator)
     .attr('stroke', '#FFFFFF')
-    .attr('stroke-width', 0.5)
+    .attr('stroke-width', responsiveStrokeWidth(BASE_STROKE_WIDTH))
     .attr('fill', 'transparent');
 
 // Setup zoom behavior
@@ -346,7 +368,7 @@ function renderMap() {
             d3.select(this)
               .transition()
               .duration(100)
-              .attr("stroke-width", 0.5)
+              .attr("stroke-width", responsiveStrokeWidth(BASE_STROKE_WIDTH))
           }
         })
       }
@@ -358,11 +380,12 @@ function renderMap() {
       currentTransform = transform
       g.style('transform', `translate(${transform.x}px, ${transform.y}px) scale(${transform.k})`)
       g.style('transform-origin', '0 0')
+      paths.attr('stroke-width', responsiveStrokeWidth(BASE_STROKE_WIDTH))
       isZoomedRef.value = transform.k !== 1 || transform.x !== 0 || transform.y !== 0
     })
     .on('end', () => {
       paths.style('pointer-events', 'auto')
-      paths.attr('stroke-width', 0.5)
+      paths.attr('stroke-width', responsiveStrokeWidth(BASE_STROKE_WIDTH))
     })
    svg.call(zoomBehavior)
   paths.each(function(this: SVGPathElement, d: any) {
@@ -384,7 +407,7 @@ function renderMap() {
       d3.select(this)
         .transition()
         .duration(100)
-        .attr("stroke-width", 0.5)
+        .attr("stroke-width", responsiveStrokeWidth(BASE_STROKE_WIDTH))
       hideTooltip()
     })
     .on('click', function(this: SVGPathElement, event: MouseEvent, d: any) {
@@ -397,7 +420,7 @@ function renderMap() {
         d3.select(this)
           .transition()
           .duration(100)
-          .attr("stroke-width", 0.5)
+          .attr("stroke-width", responsiveStrokeWidth(BASE_STROKE_WIDTH))
         hideTooltip()
         return
       }
@@ -408,7 +431,7 @@ function renderMap() {
             d3.select(this)
               .transition()
               .duration(100)
-              .attr("stroke-width", 0.5)
+              .attr("stroke-width", responsiveStrokeWidth(BASE_STROKE_WIDTH))
           }
         })
       }
@@ -438,7 +461,7 @@ onMounted(() => {
               d3.select(this)
                 .transition()
                 .duration(100)
-                .attr("stroke-width", 0.5)
+                .attr("stroke-width", responsiveStrokeWidth(BASE_STROKE_WIDTH))
             }
           })
         }
