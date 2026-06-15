@@ -3,18 +3,16 @@
       <div class="p-4 space-y-6">
         <!-- Loading Skeleton -->
         <div v-if="loading || !config" class="space-y-6">
-          <!-- Filter Options Skeleton -->
           <div>
             <div class="h-4 bg-gray-200 rounded animate-pulse mb-3 w-24"></div>
             <div class="space-y-4">
-              <div v-for="i in 2" :key="i" class="space-y-2">
+              <div v-for="i in 3" :key="i" class="space-y-2">
                 <div class="h-3 bg-gray-200 rounded animate-pulse w-20"></div>
                 <div class="h-10 bg-gray-200 rounded animate-pulse"></div>
               </div>
             </div>
           </div>
 
-          <!-- Map Options Skeleton -->
           <div>
             <div class="h-4 bg-gray-200 rounded animate-pulse mb-3 w-24"></div>
             <div class="space-y-4">
@@ -26,94 +24,108 @@
                 <div class="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
                 <div class="h-3 bg-gray-200 rounded animate-pulse w-32"></div>
               </div>
-              <div class="flex items-center gap-2">
-                <div class="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
-                <div class="h-3 bg-gray-200 rounded animate-pulse w-40"></div>
-              </div>
-              <div class="space-y-2">
-                <div class="h-3 bg-gray-200 rounded animate-pulse w-28"></div>
-                <div class="h-10 bg-gray-200 rounded animate-pulse"></div>
-              </div>
-              <div class="space-y-2">
-                <div class="h-3 bg-gray-200 rounded animate-pulse w-28"></div>
-                <div class="h-10 bg-gray-200 rounded animate-pulse"></div>
-              </div>
             </div>
           </div>
         </div>
 
         <!-- Actual Content -->
-        <div v-else>
-          <!-- Filter Options -->
+        <div v-else class="space-y-6">
+          <!-- Region level (which map) -->
+          <div v-if="mapTitles.length > 1">
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-3">
+              Region level
+            </h3>
+            <Selection
+              :label="'Map'"
+              :options="mapTitles"
+              :defaultValue="currentMapTitle"
+              @selection-changed="handleSelectMap"
+            />
+          </div>
+
+          <!-- What the map shows: a profile group, optionally broken down by one variable -->
           <div>
             <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-3">
               Choose what the map shows
             </h3>
 
-            <div v-if="hasFilterOptions" class="space-y-4">
-              <div
-                v-for="(options, categoryName) in availableFilterOptions"
-                :key="categoryName"
-              >
-                <Selection
-                  :label="getFilterLabel(categoryName)"
-                  :options="options"
-                  :defaultValue="getDefaultFilterValue(categoryName, options)"
-                  :optionLabels="getFilterOptionLabels(categoryName)"
-                  :warningOptions="getInvalidOptions(categoryName)"
-                  @selection-changed="(value) => handleFilterChanged(categoryName, value)"
-                />
-              </div>
+            <div class="space-y-4">
+              <Selection
+                :label="getFilterLabel('profile')"
+                :options="profileOptions"
+                :defaultValue="selectedProfile"
+                :optionLabels="getFilterOptionLabels('profile')"
+                @selection-changed="handleProfileChanged"
+              />
+
+              <Selection
+                v-if="demographicColumns.length"
+                :label="'Break down by'"
+                :options="breakdownOptions"
+                :defaultValue="selectedBreakdown"
+                :optionLabels="breakdownLabels"
+                @selection-changed="handleBreakdownChanged"
+              />
+
+              <Selection
+                v-if="selectedBreakdown !== NO_BREAKDOWN"
+                :label="getFilterLabel(selectedBreakdown)"
+                :options="valueOptions"
+                :defaultValue="selectedValue"
+                :optionLabels="valueLabels"
+                @selection-changed="handleValueChanged"
+              />
             </div>
 
-            <div v-else class="text-gray-500 text-sm italic">
-              No filter options available.
-            </div>
+            <p class="text-xs text-gray-500 italic mt-2">
+              The data supports one breakdown at a time, so only a single variable can be
+              selected.
+            </p>
           </div>
 
-          <!-- Map Options -->
-          <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-3 mt-6">
-            Colour and legend
-          </h3>
+          <!-- Colour and legend -->
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-3">
+              Colour and legend
+            </h3>
 
-            <div>
-              <Selection
-                :label="'Colour scale'"
-                :options="schemeNames"
-                :defaultValue="config.mapColorConfig?.colorScheme"
-                :optionLabels="schemeLabels"
-                @selection-changed="handleColorSchemeChanged"
-              />
+            <Selection
+              :label="'Colour scale'"
+              :options="schemeNames"
+              :defaultValue="config.mapColorConfig?.colorScheme"
+              :optionLabels="schemeLabels"
+              @selection-changed="handleColorSchemeChanged"
+            />
 
-              <Checkbox
-                class="mt-3"
-                label="Fit legend to selected group"
-                :defaultValue="config.mapColorConfig?.dynamic"
-                @checkbox-changed="handleDynamicLegendChanged"
-              >
-                Calculate the minimum and maximum from the current selection
-              </Checkbox>
+            <Checkbox
+              class="mt-3"
+              label="Fit legend to selected group"
+              :defaultValue="config.mapColorConfig?.dynamic"
+              @checkbox-changed="handleDynamicLegendChanged"
+            >
+              Calculate the minimum and maximum from the current selection
+            </Checkbox>
 
-              <InputField
-                class="mt-3"
-                label="Minimum share (%)"
-                :defaultValue="config.mapColorConfig?.minValue"
-                :disabled="config.mapColorConfig?.dynamic"
-                placeholder="0.00"
-                @input-changed="handleLegendMinimumChanged"
-              />
+            <InputField
+              class="mt-3"
+              label="Minimum share (%)"
+              :defaultValue="config.mapColorConfig?.minValue"
+              :disabled="config.mapColorConfig?.dynamic"
+              placeholder="0.00"
+              @input-changed="handleLegendMinimumChanged"
+            />
 
-              <InputField
-                class="mt-3"
-                label="Maximum share (%)"
-                :defaultValue="config.mapColorConfig?.maxValue"
-                :disabled="config.mapColorConfig?.dynamic"
-                placeholder="1.00"
-                @input-changed="handleLegendMaximumChanged"
-              />
-            </div>
+            <InputField
+              class="mt-3"
+              label="Maximum share (%)"
+              :defaultValue="config.mapColorConfig?.maxValue"
+              :disabled="config.mapColorConfig?.dynamic"
+              placeholder="1.00"
+              @input-changed="handleLegendMaximumChanged"
+            />
           </div>
         </div>
+      </div>
     </section>
 </template>
 
@@ -124,117 +136,137 @@ import Checkbox from './checkbox.vue'
 import InputField from './input-field.vue'
 import { colorSchemes, colorSchemeLabels } from '../map-config/types.ts'
 import type { MapConfig } from '../map-config/types.ts'
-import type { FilterLookup } from '../map/manager'
 
 const schemeNames: string[] = [...colorSchemes]
 const schemeLabels: Record<string, string> = colorSchemeLabels
 
+// Synthetic "no breakdown" option, and the pipeline's marker for an unfiltered category.
+const NO_BREAKDOWN = '__none__'
+const INACTIVE = 'All'
+
 const props = defineProps<{
-  availableFilterOptions?: Record<string, any>
+  availableFilterOptions?: Record<string, string[]>
   config?: MapConfig
+  configs?: MapConfig[]
   loading?: boolean
-  validFilterLookup?: FilterLookup
 }>()
 
-const emit = defineEmits([
-  'filter-changed',
-  'map-config-changed'
-])
+const emit = defineEmits<{
+  (e: 'filters-changed', filters: Record<string, string>): void
+  (e: 'map-config-changed', value: Record<string, unknown>): void
+  (e: 'select-map', title: string): void
+}>()
 
-// Track the current selected filters
-const selectedFilters = ref<Record<string, string>>({})
+// --- Region level (which map) ---
+const mapTitles = computed(() => (props.configs ?? []).map(c => c.mapDescription.title))
+const currentMapTitle = computed(() => props.config?.mapDescription.title ?? '')
 
-// Initialize selected filters when availableFilterOptions changes
-watch(
-  () => props.availableFilterOptions,
-  (newOptions) => {
-    if (!newOptions) return
+function handleSelectMap(title: string) {
+  if (title && title !== currentMapTitle.value) emit('select-map', title)
+}
 
-    const newFilters: Record<string, string> = {}
-    for (const categoryName in newOptions) {
-      newFilters[categoryName] = getDefaultFilterValue(categoryName, newOptions[categoryName])
-    }
-    selectedFilters.value = newFilters
-  },
-  { immediate: true, deep: true }
+// --- Filters ---
+// `profile` is always present and never "All"; the remaining category columns are demographic
+// breakdowns, of which the dataset only ever holds one at a time (single-variable marginals).
+const demographicColumns = computed(() =>
+  (props.config?.categoryColumns ?? []).filter(c => c !== 'profile')
 )
+const profileOptions = computed(() => props.availableFilterOptions?.profile ?? [])
 
-const hasFilterOptions = computed(() =>
-  props.availableFilterOptions && Object.keys(props.availableFilterOptions).length > 0
-)
+const selectedProfile = ref<string>('')
+const selectedBreakdown = ref<string>(NO_BREAKDOWN)
+const selectedValue = ref<string>('')
 
-// Compute invalid options for each category based on current selected filters
-const invalidOptionsByCategory = computed(() => {
-  if (!props.validFilterLookup || !props.availableFilterOptions) {
-    return {}
-  }
-
-  const result: Record<string, string[]> = {}
-
-  for (const categoryName in props.availableFilterOptions) {
-
-    const options = props.availableFilterOptions[categoryName]
-    const validOptions = props.validFilterLookup.lookup(selectedFilters.value, categoryName)
-    result[categoryName] = options.filter((option: string) => !validOptions.includes(option))
-  }
-  return result
+const breakdownOptions = computed(() => [NO_BREAKDOWN, ...demographicColumns.value])
+const breakdownLabels = computed(() => {
+  const labels: Record<string, string> = { [NO_BREAKDOWN]: 'None (overall)' }
+  for (const col of demographicColumns.value) labels[col] = getFilterLabel(col)
+  return labels
 })
 
-function getDefaultFilterValue (categoryName: string, options: string[]) {
-  if (
-    props.config?.filter !== undefined &&
-    Object.prototype.hasOwnProperty.call(props.config.filter, categoryName)
-  ) {
-    return props.config.filter[categoryName]
-  }
-  return options?.[0]
-}
-
-function getInvalidOptions(categoryName: string): string[] {
-  return invalidOptionsByCategory.value[categoryName] || []
-}
+// Concrete values for the chosen breakdown variable, minus the "All" marker.
+const valueOptions = computed(() => {
+  if (selectedBreakdown.value === NO_BREAKDOWN) return []
+  return (props.availableFilterOptions?.[selectedBreakdown.value] ?? []).filter(
+    v => v !== INACTIVE
+  )
+})
+const valueLabels = computed(() => getFilterOptionLabels(selectedBreakdown.value))
 
 function getFilterLabel(categoryName: string): string {
   return props.config?.categoryLabels?.[categoryName] || categoryName
 }
-
 function getFilterOptionLabels(categoryName: string): Record<string, string> {
   return props.config?.categoryOptionLabels?.[categoryName] || {}
 }
 
-function handleFilterChanged (categoryName: string, value: string) {
-  // Update local state
-  selectedFilters.value = {
-    ...selectedFilters.value,
-    [categoryName]: value
-  }
+// Reset the selection whenever the active map (and therefore its options) changes.
+watch(
+  () => [props.config?.mapDescription.title, props.availableFilterOptions],
+  () => initSelection(),
+  { immediate: true, deep: true }
+)
 
-  // Emit to parent
-  emit('filter-changed', categoryName, value)
-}
-
-function handleMapConfigChange (field: string, value: any) {
+function initSelection() {
   if (!props.config) return
+  const filter = props.config.filter ?? {}
+  selectedProfile.value = filter.profile ?? profileOptions.value[0] ?? ''
 
-  emit('map-config-changed', {
-    ...props.config.mapColorConfig,
-    [field]: value
-  })
+  // Treat a demographic with a non-"All" default as the initially active breakdown.
+  const active = demographicColumns.value.find(
+    col => filter[col] !== undefined && filter[col] !== INACTIVE
+  )
+  selectedBreakdown.value = active ?? NO_BREAKDOWN
+  selectedValue.value = active !== undefined ? filter[active] : ''
+  emitFilters()
 }
 
-function handleColorSchemeChanged (value: string) {
+function buildFilters(): Record<string, string> {
+  const filters: Record<string, string> = {}
+  for (const col of demographicColumns.value) filters[col] = INACTIVE
+  filters.profile = selectedProfile.value
+  if (selectedBreakdown.value !== NO_BREAKDOWN && selectedValue.value) {
+    filters[selectedBreakdown.value] = selectedValue.value
+  }
+  return filters
+}
+
+function emitFilters() {
+  emit('filters-changed', buildFilters())
+}
+
+function handleProfileChanged(value: string) {
+  selectedProfile.value = value
+  emitFilters()
+}
+
+function handleBreakdownChanged(value: string) {
+  selectedBreakdown.value = value
+  // Default to the first concrete value of the newly chosen breakdown variable.
+  selectedValue.value = value === NO_BREAKDOWN ? '' : valueOptions.value[0] ?? ''
+  emitFilters()
+}
+
+function handleValueChanged(value: string) {
+  selectedValue.value = value
+  emitFilters()
+}
+
+// --- Colour and legend ---
+function handleMapConfigChange(field: string, value: unknown) {
+  if (!props.config) return
+  emit('map-config-changed', { ...props.config.mapColorConfig, [field]: value })
+}
+function handleColorSchemeChanged(value: string) {
   handleMapConfigChange('colorScheme', value)
 }
-
-function handleDynamicLegendChanged (value: boolean) {
+function handleDynamicLegendChanged(value: boolean) {
   handleMapConfigChange('dynamic', value)
 }
-
-function handleLegendMinimumChanged (value: number) {
+function handleLegendMinimumChanged(value: number) {
   handleMapConfigChange('minValue', value)
 }
-
-function handleLegendMaximumChanged (value: number) {
+function handleLegendMaximumChanged(value: number) {
   handleMapConfigChange('maxValue', value)
 }
 </script>

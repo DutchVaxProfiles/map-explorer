@@ -61,23 +61,6 @@
           </div>
         </div>
 
-        <!-- Map Selector -->
-        <div class="absolute top-4 right-18" v-if="configs.length > 1">
-          <Button v-model="showMapSelector">
-            <SwitchIcon />
-          </Button>
-        </div>
-
-        <div v-show="showMapSelector">
-            <MapSelector
-              :configs="configs"
-              :config="config"
-              :loading="isLoading"
-              @select-map="handleSwitchMap"
-              @close-map-selector="handleCloseMapSelector"
-          />
-        </div>
-
         <!-- Control Panel -->
         <div class="absolute top-4 right-4">
           <Button v-model="showControls">
@@ -90,10 +73,11 @@
             <ControlPanel
               :availableFilterOptions="availableFilterOptions"
               :config="config"
+              :configs="configs"
               :loading="isLoading"
-              :validFilterLookup="validFilterLookup"
-              @filter-changed="handleFilterChanged"
+              @filters-changed="handleFiltersChanged"
               @map-config-changed="handleMapColorConfigChanged"
+              @select-map="handleSwitchMap"
             />
           </div>
         </div>
@@ -109,7 +93,6 @@ import { ref, onMounted, watch } from "vue"
 import BarchartIcon from "./components/icons/barchart-icon.vue"
 import SettingsIcon from "./components/icons/settings-icon.vue"
 import InformationIcon from "./components/icons/information-icon.vue"
-import SwitchIcon from "./components/icons/switch-icon.vue"
 import LoadingMap from "./components/icons/loading-map.vue"
 
 // components
@@ -117,7 +100,6 @@ import Map from "./components/map.vue"
 import LegendHistogram from "./components/legend-histogram.vue"
 import ControlPanel from "./components/control-panel.vue"
 import MapDescription from "./components/map-description.vue"
-import MapSelector from "./components/map-selector.vue"
 import Button from "./components/button.vue"
 
 import type { RegionData } from "./data-processing/types"
@@ -125,13 +107,11 @@ import { Processor } from "./data-processing/processor"
 import { mapConfigs } from "./map-config/loader"
 import type { MapConfig } from "./map-config/types"
 import { MapManager } from "./map/manager"
-import type { FilterLookup } from "./map/manager"
 
 // UI toggles
 const showInfo = ref(false)
 const showLegend = ref(true)
 const showControls = ref(true)
-const showMapSelector = ref(false)
 
 // App state
 const dataProcessor = ref<Processor | undefined>(undefined)
@@ -140,7 +120,6 @@ const regionData = ref<RegionData[] | undefined>(undefined)
 const selectedLegendColor = ref<string>("")
 const config = ref<MapConfig | undefined>(undefined)
 const configs = ref<MapConfig[]>([])
-const validFilterLookup = ref<FilterLookup | undefined>(undefined)
 
 
 // Filter state
@@ -173,7 +152,6 @@ async function handleSwitchMap(mapTitle: string) {
   if (config.value === undefined) return
 
   isLoading.value = true
-  showMapSelector.value = false
 
   // Store Cache
   handleMapConfigChanged("filter", selectedFilters.value)
@@ -205,11 +183,10 @@ async function applyMap(mapConfig: MapConfig) {
   regionData.value = state.regionData
   availableFilterOptions.value = { ...state.availableFilterOptions }
   selectedFilters.value = { ...state.selectedFilters }
-  validFilterLookup.value = state.validFilterLookup
 }
 
-function handleFilterChanged(categoryName: string, value: any) {
-  selectedFilters.value[categoryName] = value
+function handleFiltersChanged(filters: Record<string, string>) {
+  selectedFilters.value = { ...filters }
 }
 
 function handleSelectedLegendColorChanged(color: string) {
@@ -235,12 +212,6 @@ function handleMapConfigChanged(key: string, value: any) {
     [key]: value
   }
 }
-
-function handleCloseMapSelector() {
-  console.log("[App] Map selector closed")
-  showMapSelector.value = false
-}
-
 
 // App initialization
 async function initializeApp() {

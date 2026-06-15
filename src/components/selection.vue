@@ -20,7 +20,7 @@
 </template>
 <script setup lang="ts">
 
-import { ref } from "vue"
+import { ref, watch } from "vue"
 
 const props = withDefaults(
   defineProps<{
@@ -40,8 +40,26 @@ const emit = defineEmits<{
   (e: "selection-changed", value: string): void
 }>()
 
-const selectedValue = ref<string>(
-  props.defaultValue ?? props.options[0]
+function resolveSelectedValue(): string {
+  if (
+    props.defaultValue !== undefined &&
+    props.defaultValue !== null &&
+    props.options.includes(props.defaultValue)
+  ) {
+    return props.defaultValue
+  }
+
+  return props.options[0] ?? ""
+}
+
+const selectedValue = ref<string>(resolveSelectedValue())
+
+watch(
+  () => [props.defaultValue, props.options],
+  () => {
+    selectedValue.value = resolveSelectedValue()
+  },
+  { deep: true }
 )
 
 function emitSelection() {
