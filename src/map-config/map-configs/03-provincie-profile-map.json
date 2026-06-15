@@ -1,8 +1,8 @@
 {
   "kind": "geojson-datafile",
   "mapDescription": {
-    "title": "Wijk-level vaccination profile groups",
-    "description": "Explore estimated vaccination profile group shares across Dutch wijken. Values are percentages at aggregate level; cells suppressed by CBS output rules are shown as no data."
+    "title": "Province-level vaccination profile groups",
+    "description": "Explore estimated vaccination profile group shares across Dutch provinces. Values are percentages at aggregate level; cells suppressed by CBS output rules are shown as no data."
   },
   "categoryColumns": [
     "profile",
@@ -83,8 +83,8 @@
   "valueColumn": "value",
   "idColumnGeojson": "statcode",
   "idColumnDataFile": "statcode",
-  "dataFileName": "wijk_2025_data.parquet",
-  "geojsonFileName": "wijk_2025.geojson",
+  "dataFileName": "provincie_2025_data.parquet",
+  "geojsonFileName": "provincie_2025.geojson",
   "legendTitle": "Estimated share of residents (%)",
   "mapColorConfig": {
     "minValue": 0,

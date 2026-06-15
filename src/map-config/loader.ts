@@ -26,8 +26,9 @@ export function validateMapConfig(input: unknown): MapConfig {
 }
 
 
-export const mapConfigs: MapConfig[] = Object.values(jsonModules).map(
-  (mod) => validateMapConfig((mod as RawJsonModule).default)
+export const mapConfigs: MapConfig[] = Object.entries(jsonModules)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([, mod]) => validateMapConfig((mod as RawJsonModule).default)
 )
 
 console.log(`[App Config Loader] found ${mapConfigs.length} config(s):`, mapConfigs.map(c => c.mapDescription.title))

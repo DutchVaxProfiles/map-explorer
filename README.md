@@ -1,36 +1,30 @@
 # DutchVaxProfiles Map Explorer
 
 This repository is the DutchVaxProfiles map app, built from the current
-`sodascience/map-explorer` upstream. The current app uses one active map
-configuration:
+`sodascience/map-explorer` upstream. The current app uses four active CBS 2025
+map configurations:
 
 - `src/map-config/map-configs/01-wijk-profile-map.json`
+- `src/map-config/map-configs/02-gemeente-profile-map.json`
+- `src/map-config/map-configs/03-provincie-profile-map.json`
+- `src/map-config/map-configs/04-buurt-profile-map.json`
 
-The app expects these generated files in `public/`:
+The real CBS-linked files are generated into `public/`:
 
-- `wijk_5_processed.csv`
-- `wijk_2024.geojson`
-- `preprocess_report.json`
+- `<level>_2025_data.parquet`
+- `<level>_2025.geojson`
+- `conversion_report.json`
 
-Interim five-profile wijk data from the earlier map fork are included while the
-final CBS-linked model output is being prepared; see
-`public/README-interim-wijk-data.md`.
+Generate or refresh them from the project-level converter:
 
-Generate final files from a raw CBS/export CSV and a CBS wijk GeoJSON:
-
-```sh
-uv run python scripts/preprocess_map_data.py \
-  --input data/raw/profile_export.csv \
-  --geo-level wijk \
-  --geo-year 2026 \
-  --geojson data/geo/wijk_2026.geojson \
-  --output-public public
+```bash
+cd ../cbs_to_map_explorer
+uv run clean.py
 ```
 
-The raw CSV must contain `wijk_code`, `n_sample`, and `profile_1` through
-`profile_5`. See `scripts/README.md` for validation rules and output schema.
-If the final geometry year differs from the interim `wijk_2024.geojson`, update
-`geojsonFileName` in `01-wijk-profile-map.json` to match the generated file.
+The older `scripts/preprocess_map_data.py` script is retained for the interim
+wide-profile fixtures and tests, but the real CBS export pipeline lives in
+`../cbs_to_map_explorer`.
 
 ## Upstream Map Explorer
 
