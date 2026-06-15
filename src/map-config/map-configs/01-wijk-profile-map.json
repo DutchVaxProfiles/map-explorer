@@ -54,10 +54,10 @@
     },
     "country_origin_4cats": {
       "All": "All",
-      "1": "Country of origin category 1",
-      "2": "Country of origin category 2",
-      "3": "Country of origin category 3",
-      "4": "Country of origin category 4"
+      "1": "Netherlands",
+      "2": "Europe (exc. NL)",
+      "3": "Traditional (Turkey, Morocco, Suriname)",
+      "4": "Others - outside Europe"
     },
     "income_quintile": {
       "All": "All",

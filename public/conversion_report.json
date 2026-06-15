@@ -59,7 +59,7 @@
       "data_file": "/Users/garci061/pCloud Drive/projects/2024_covid_danielle/cbs_to_map_explorer/../map-explorer/public/provincie_2025_data.parquet",
       "geojson_file": "/Users/garci061/pCloud Drive/projects/2024_covid_danielle/cbs_to_map_explorer/../map-explorer/public/provincie_2025.geojson",
       "map_config_file": "/Users/garci061/pCloud Drive/projects/2024_covid_danielle/cbs_to_map_explorer/../map-explorer/src/map-config/map-configs/03-provincie-profile-map.json",
-      "data_file_bytes": 22091,
+      "data_file_bytes": 22092,
       "geojson_file_bytes": 26993
     },
     {
@@ -83,5 +83,5 @@
       "geojson_file_bytes": 6078791
     }
   ],
-  "total_output_bytes": 16341837
+  "total_output_bytes": 16341838
 }

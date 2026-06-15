@@ -34,7 +34,7 @@ export class MapColor {
   private getColorInterpolator(): (t: number) => string {
     switch (this.colorScheme) {
       case 'magma':       return (t: number) => d3.interpolateMagma(1 - t)
-      case 'coolwarm':    return d3.interpolateRdBu
+      case 'coolwarm':    return (t: number) => d3.interpolateRdBu(1 - t)
       default:            return (t: number) => d3.interpolateMagma(1 - t)
     }
   }
