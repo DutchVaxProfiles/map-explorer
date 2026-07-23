@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "^1.29.1-dev132.0",
-    "@fontsource/fira-sans": "^5.2.7",
+    "@fontsource/fira-sans": "^5.3.0",
     "@mapbox/geojson-rewind": "^0.5.2",
     "@placemarkio/check-geojson": "^0.1.14",
     "@popperjs/core": "^2.11.8",
