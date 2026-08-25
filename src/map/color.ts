@@ -34,7 +34,8 @@ export class MapColor {
   private getColorInterpolator(): (t: number) => string {
     switch (this.colorScheme) {
       case 'magma':       return (t: number) => d3.interpolateMagma(1 - t)
-      case 'coolwarm':    return (t: number) => d3.interpolateRdBu(1 - t)
+      // RdYlBu instead of RdBu: middle bin reads light yellow, not washed-out gray
+      case 'coolwarm':    return (t: number) => d3.interpolateRdYlBu(1 - t)
       default:            return (t: number) => d3.interpolateMagma(1 - t)
     }
   }
