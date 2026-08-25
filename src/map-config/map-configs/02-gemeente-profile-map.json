@@ -34,8 +34,8 @@
     },
     "gender": {
       "All": "All",
-      "1": "Female",
-      "2": "Male"
+      "Female": "Female",
+      "Male": "Male"
     },
     "educ_group_3cats": {
       "All": "All",
@@ -46,18 +46,18 @@
     },
     "urbanization_ord": {
       "All": "All",
-      "1": "Very strongly urbanised",
-      "2": "Strongly urbanised",
-      "3": "Moderately urbanised",
-      "4": "Slightly urbanised",
-      "5": "Not urbanised"
+      "Extremely urbanised": "Extremely urbanised",
+      "Strongly urbanised": "Strongly urbanised",
+      "Moderate": "Moderately urbanised",
+      "Hardly urbanised": "Hardly urbanised",
+      "Not urbanised": "Not urbanised"
     },
     "country_origin_4cats": {
       "All": "All",
-      "1": "Netherlands",
-      "2": "Europe (exc. NL)",
-      "3": "Traditional (Turkey, Morocco, Suriname)",
-      "4": "Others - outside Europe"
+      "Nederland": "Netherlands",
+      "Europa": "Europe (exc. NL)",
+      "Tradicional_origin_countries": "Traditional origin countries (Turkey, Morocco, Suriname)",
+      "Other": "Others - outside Europe"
     },
     "income_quintile": {
       "All": "All",
