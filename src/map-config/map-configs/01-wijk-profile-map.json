@@ -26,11 +26,11 @@
   },
   "categoryOptionLabels": {
     "profile": {
-      "1": "Group 1: neutral profile group",
-      "2": "Group 2: neutral profile group",
-      "3": "Group 3: positive profile group",
-      "4": "Group 4: positive profile group",
-      "5": "Group 5: negative profile group"
+      "1": "Group 1: 89% vaccination rate",
+      "2": "Group 2: 19% vaccination rate",
+      "3": "Group 3: 99% vaccination rate",
+      "4": "Group 4: 98% vaccination rate",
+      "5": "Group 5: 78% vaccination rate"
     },
     "gender": {
       "All": "All",
