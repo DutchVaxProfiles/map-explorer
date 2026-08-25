@@ -185,11 +185,21 @@ const breakdownLabels = computed(() => {
 })
 
 // Concrete values for the chosen breakdown variable, minus the "All" marker.
+// The config's option-label key order is the intended display order (e.g. ordinal
+// urbanisation levels whose raw values don't sort alphabetically); values without
+// a label keep their data-driven order at the end.
 const valueOptions = computed(() => {
   if (selectedBreakdown.value === NO_BREAKDOWN) return []
-  return (props.availableFilterOptions?.[selectedBreakdown.value] ?? []).filter(
+  const options = (props.availableFilterOptions?.[selectedBreakdown.value] ?? []).filter(
     v => v !== INACTIVE
   )
+  const order = Object.keys(getFilterOptionLabels(selectedBreakdown.value))
+  if (order.length === 0) return options
+  const rank = (value: string) => {
+    const index = order.indexOf(value)
+    return index === -1 ? order.length : index
+  }
+  return [...options].sort((a, b) => rank(a) - rank(b))
 })
 const valueLabels = computed(() => getFilterOptionLabels(selectedBreakdown.value))
 
